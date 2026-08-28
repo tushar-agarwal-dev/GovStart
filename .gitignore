@@ -1,0 +1,21 @@
+# Spring Boot Ignored Files
+backend/target/
+backend/.mvn/
+backend/*.class
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/.factorypath
+backend/bin/
+
+# React Vite Frontend Ignored Files
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/*.log
+frontend/.vscode/
+
+# OS Specific Ignored Files
+.DS_Store
+Thumbs.db
