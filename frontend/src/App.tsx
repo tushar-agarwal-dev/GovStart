@@ -11,7 +11,6 @@ import {
   ArrowRight, 
   Users, 
   BarChart3, 
-  Settings, 
   Clock, 
   Award, 
   ChevronRight, 
@@ -347,36 +346,6 @@ export default function App() {
     }
   };
 
-  // Guest Demo Login which executes login automatically
-  const handleGuestLogin = async (role: string) => {
-    let email = '';
-    let password = '';
-    if (role === 'admin') {
-      email = 'admin@govstart.gov.in';
-      password = 'AdminPass_GovStart_2026!';
-    } else if (role === 'dept') {
-      email = 'dept@govstart.gov.in';
-      password = 'DeptPass_GovStart_2026!';
-    } else if (role === 'startup') {
-      email = 'ecotech@startups.in';
-      password = 'StartupPass_GovStart_2026!';
-    } else if (role === 'expert') {
-      email = 'kulkarni@coep.ac.in';
-      password = 'ExpertPass_GovStart_2026!';
-    }
-    
-    try {
-      showToast(`Logging in as Guest ${role.toUpperCase()}...`);
-      const result = await apiFetch('/api/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, password })
-      });
-      setAuth(result);
-      showToast('Logged in successfully as Guest!');
-    } catch (err) {
-      showToast('Failed to log in as Guest', 'error');
-    }
-  };
 
   // Department: Create problem
   const handleCreateProblem = async (e: React.FormEvent) => {
@@ -760,45 +729,132 @@ export default function App() {
               </div>
             </div>
 
-            {/* Quick-Access Demo Roles Panel */}
-            <div className="bg-slate-900 p-8 rounded-2xl shadow-2xl text-white max-w-4xl mx-auto border border-slate-800">
-              <div className="mb-6 text-center">
-                <span className="text-indigo-400 text-xs font-bold tracking-widest uppercase">Guest Demo Access</span>
-                <h3 className="text-2xl font-black mt-1">Instant Guest Login</h3>
-                <p className="text-slate-400 text-sm mt-1">Log in instantly with a single click as any of the 4 roles below (no passwords required).</p>
+            {/* Core Statistics Banner */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto pt-6">
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center space-y-1">
+                <span className="text-2xl font-black text-indigo-600">₹45 Lakhs+</span>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Escrow Budget Vetted</p>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div 
-                  onClick={() => handleGuestLogin('dept')}
-                  className="bg-slate-800 hover:bg-indigo-900/40 border border-slate-700/60 p-4 rounded-xl cursor-pointer transition-colors text-center group"
-                >
-                  <Building2 className="mx-auto mb-2 text-indigo-400 group-hover:scale-110 transition-transform" size={32} />
-                  <span className="block text-sm font-bold text-slate-100">Department</span>
-                  <span className="text-[10px] text-slate-400 block mt-1">Create Problem, Pilot</span>
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center space-y-1">
+                <span className="text-2xl font-black text-slate-800">4 Active</span>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Sandbox Pilots Running</p>
+              </div>
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center space-y-1">
+                <span className="text-2xl font-black text-slate-800">DPIIT Integration</span>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">1-Click Startup Verification</p>
+              </div>
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center space-y-1">
+                <span className="text-2xl font-black text-indigo-600">100% GFR</span>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Audit Exemption Compliance</p>
+              </div>
+            </div>
+
+            {/* Complete Platform Workflow Diagram */}
+            <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm max-w-5xl mx-auto space-y-8">
+              <div className="text-center max-w-md mx-auto space-y-1.5">
+                <span className="text-indigo-600 text-xs font-bold uppercase tracking-widest block">System Flowchart</span>
+                <h3 className="text-2xl font-black text-slate-900 leading-none">End-to-End Procurement Pathway</h3>
+                <p className="text-slate-500 text-xs leading-normal">How GovStart bypasses standard bidding rules and manages active sandbox pilots.</p>
+              </div>
+
+              {/* Graphical Workflow Nodes */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative pt-4">
+                
+                {/* Step 1 */}
+                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 relative group hover:border-indigo-200 transition-colors">
+                  <div className="w-8 h-8 rounded-full bg-indigo-650 text-white flex items-center justify-center font-bold text-xs">1</div>
+                  <div className="space-y-1">
+                    <h4 className="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+                      <Building2 size={16} className="text-indigo-600" /> Department Outcome Posting
+                    </h4>
+                    <p className="text-slate-500 text-[11px] leading-normal">Officers list outcome goals (e.g. "Smart Sorter") rather than drafting narrow specifications, opening doors for innovative startups.</p>
+                  </div>
                 </div>
-                <div 
-                  onClick={() => handleGuestLogin('startup')}
-                  className="bg-slate-800 hover:bg-indigo-900/40 border border-slate-700/60 p-4 rounded-xl cursor-pointer transition-colors text-center group"
-                >
-                  <Rocket className="mx-auto mb-2 text-indigo-400 group-hover:scale-110 transition-transform" size={32} />
-                  <span className="block text-sm font-bold text-slate-100">Startup</span>
-                  <span className="text-[10px] text-slate-400 block mt-1">Submit updates, profile</span>
+
+                {/* Step 2 */}
+                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 relative group hover:border-indigo-200 transition-colors">
+                  <div className="w-8 h-8 rounded-full bg-indigo-650 text-white flex items-center justify-center font-bold text-xs">2</div>
+                  <div className="space-y-1">
+                    <h4 className="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+                      <Cpu size={16} className="text-indigo-600" /> Jaccard + AI Matching
+                    </h4>
+                    <p className="text-slate-500 text-[11px] leading-normal">System validates DPIIT numbers and uses Gemini 1.5 Flash to compute matching scores based on real capabilities and tags.</p>
+                  </div>
                 </div>
-                <div 
-                  onClick={() => handleGuestLogin('expert')}
-                  className="bg-slate-800 hover:bg-indigo-900/40 border border-slate-700/60 p-4 rounded-xl cursor-pointer transition-colors text-center group"
-                >
-                  <GraduationCap className="mx-auto mb-2 text-indigo-400 group-hover:scale-110 transition-transform" size={32} />
-                  <span className="block text-sm font-bold text-slate-100">Expert Panel</span>
-                  <span className="text-[10px] text-slate-400 block mt-1">Assign ratings, scorecard</span>
+
+                {/* Step 3 */}
+                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 relative group hover:border-indigo-200 transition-colors">
+                  <div className="w-8 h-8 rounded-full bg-indigo-650 text-white flex items-center justify-center font-bold text-xs">3</div>
+                  <div className="space-y-1">
+                    <h4 className="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+                      <GraduationCap size={16} className="text-indigo-600" /> Academic Scorecard Vetting
+                    </h4>
+                    <p className="text-slate-500 text-[11px] leading-normal">Professors (COEP/VJTI) rate submissions on feasibility and cost sliders, providing legal audit justification for GFR exemption.</p>
+                  </div>
                 </div>
-                <div 
-                  onClick={() => handleGuestLogin('admin')}
-                  className="bg-slate-800 hover:bg-indigo-900/40 border border-slate-700/60 p-4 rounded-xl cursor-pointer transition-colors text-center group"
-                >
-                  <Settings className="mx-auto mb-2 text-indigo-400 group-hover:scale-110 transition-transform" size={32} />
-                  <span className="block text-sm font-bold text-slate-100">Admin</span>
-                  <span className="text-[10px] text-slate-400 block mt-1">Monitor statistics, users</span>
+
+                {/* Step 4 */}
+                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 relative group hover:border-indigo-200 transition-colors">
+                  <div className="w-8 h-8 rounded-full bg-indigo-650 text-white flex items-center justify-center font-bold text-xs">4</div>
+                  <div className="space-y-1">
+                    <h4 className="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+                      <ShieldCheck size={16} className="text-indigo-600" /> Stamp NDA & Escrow Lock
+                    </h4>
+                    <p className="text-slate-500 text-[11px] leading-normal">Standardized legal contracts are generated on ₹500 non-judicial stamp paper while pilot budgets are securely locked in escrow.</p>
+                  </div>
+                </div>
+
+                {/* Step 5 */}
+                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 relative group hover:border-indigo-200 transition-colors">
+                  <div className="w-8 h-8 rounded-full bg-indigo-650 text-white flex items-center justify-center font-bold text-xs">5</div>
+                  <div className="space-y-1">
+                    <h4 className="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+                      <Clock size={16} className="text-indigo-600" /> Milestone SLA payouts
+                    </h4>
+                    <p className="text-slate-500 text-[11px] leading-normal">Startups submit files in an encrypted IP vault. 7-day SLA timers auto-approve tranches to ensure prompt payouts.</p>
+                  </div>
+                </div>
+
+                {/* Step 6 */}
+                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 relative group hover:border-indigo-200 transition-colors">
+                  <div className="w-8 h-8 rounded-full bg-indigo-650 text-white flex items-center justify-center font-bold text-xs">6</div>
+                  <div className="space-y-1">
+                    <h4 className="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+                      <BarChart3 size={16} className="text-indigo-600" /> Direct GeM Cataloging
+                    </h4>
+                    <p className="text-slate-500 text-[11px] leading-normal">Vetted sandbox outcomes bypass L1 tenders and are published directly to the Government e-Marketplace (GeM) catalog.</p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Core Innovation Safeguards Section */}
+            <div className="max-w-5xl mx-auto space-y-6">
+              <div className="text-center space-y-1.5">
+                <span className="text-indigo-600 text-xs font-bold uppercase tracking-widest block">Product Capabilities</span>
+                <h3 className="text-2xl font-black text-slate-900">Advanced Procurement Safeguards</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-start gap-4 hover:border-indigo-200 transition-colors">
+                  <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+                    <Cpu size={24} />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-bold text-slate-800 text-sm">Chained Tamper-Evident Ledger</h4>
+                    <p className="text-slate-500 text-[11px] leading-relaxed">Every database record is cryptographically signed with a SHA-256 hash linked to the prior block. Database edits instantly break the chain and raise alarms for audit officers.</p>
+                  </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-start gap-4 hover:border-indigo-200 transition-colors">
+                  <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+                    <ShieldCheck size={24} />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-bold text-slate-800 text-sm">Client-Side IP Encryption Vault</h4>
+                    <p className="text-slate-500 text-[11px] leading-relaxed">Startups upload schematics and codes with local client-side document encryption hashing. Protects sensitive designs while giving departments verifiable progress keys.</p>
+                  </div>
                 </div>
               </div>
             </div>
