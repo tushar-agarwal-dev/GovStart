@@ -42,6 +42,42 @@ public class Problem {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    // Multi-step challenge extension fields
+    private String category;
+    private String location;
+    @Column(name = "contact_person")
+    private String contactPerson;
+    @Column(name = "current_problem", columnDefinition = "TEXT")
+    private String currentProblem;
+    @Column(name = "existing_process", columnDefinition = "TEXT")
+    private String existingProcess;
+    @Column(name = "target_beneficiaries")
+    private String targetBeneficiaries;
+    @Column(name = "desired_outcome", columnDefinition = "TEXT")
+    private String desiredOutcome;
+    @Column(name = "baseline_performance")
+    private String baselinePerformance;
+    @Column(name = "target_performance")
+    private String targetPerformance;
+    @Column(name = "expected_impact", columnDefinition = "TEXT")
+    private String expectedImpact;
+    @Column(name = "geographic_scope")
+    private String geographicScope;
+    @Column(name = "dpiit_required")
+    private Boolean dpiitRequired;
+    @Column(name = "tech_requirements", columnDefinition = "TEXT")
+    private String techRequirements;
+    @Column(name = "min_criteria", columnDefinition = "TEXT")
+    private String minCriteria;
+    @Column(name = "evaluation_weights_json", columnDefinition = "TEXT")
+    private String evaluationWeightsJson;
+    @Column(name = "kpis_json", columnDefinition = "TEXT")
+    private String kpisJson;
+    @Column(name = "milestones_json", columnDefinition = "TEXT")
+    private String milestonesJson;
+    @Column(name = "eligibility_requirements", columnDefinition = "TEXT")
+    private String eligibilityRequirements;
+
     public Problem() {}
 
     public Problem(DepartmentProfile department, String title, String description, List<String> tags,
@@ -85,6 +121,43 @@ public class Problem {
     public void setStatus(String status) { this.status = status; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
+    public String getContactPerson() { return contactPerson; }
+    public void setContactPerson(String contactPerson) { this.contactPerson = contactPerson; }
+    public String getCurrentProblem() { return currentProblem; }
+    public void setCurrentProblem(String currentProblem) { this.currentProblem = currentProblem; }
+    public String getExistingProcess() { return existingProcess; }
+    public void setExistingProcess(String existingProcess) { this.existingProcess = existingProcess; }
+    public String getTargetBeneficiaries() { return targetBeneficiaries; }
+    public void setTargetBeneficiaries(String targetBeneficiaries) { this.targetBeneficiaries = targetBeneficiaries; }
+    public String getDesiredOutcome() { return desiredOutcome; }
+    public void setDesiredOutcome(String desiredOutcome) { this.desiredOutcome = desiredOutcome; }
+    public String getBaselinePerformance() { return baselinePerformance; }
+    public void setBaselinePerformance(String baselinePerformance) { this.baselinePerformance = baselinePerformance; }
+    public String getTargetPerformance() { return targetPerformance; }
+    public void setTargetPerformance(String targetPerformance) { this.targetPerformance = targetPerformance; }
+    public String getExpectedImpact() { return expectedImpact; }
+    public void setExpectedImpact(String expectedImpact) { this.expectedImpact = expectedImpact; }
+    public String getGeographicScope() { return geographicScope; }
+    public void setGeographicScope(String geographicScope) { this.geographicScope = geographicScope; }
+    public Boolean getDpiitRequired() { return dpiitRequired; }
+    public void setDpiitRequired(Boolean dpiitRequired) { this.dpiitRequired = dpiitRequired; }
+    public String getTechRequirements() { return techRequirements; }
+    public void setTechRequirements(String techRequirements) { this.techRequirements = techRequirements; }
+    public String getMinCriteria() { return minCriteria; }
+    public void setMinCriteria(String minCriteria) { this.minCriteria = minCriteria; }
+    public String getEvaluationWeightsJson() { return evaluationWeightsJson; }
+    public void setEvaluationWeightsJson(String evaluationWeightsJson) { this.evaluationWeightsJson = evaluationWeightsJson; }
+    public String getKpisJson() { return kpisJson; }
+    public void setKpisJson(String kpisJson) { this.kpisJson = kpisJson; }
+    public String getMilestonesJson() { return milestonesJson; }
+    public void setMilestonesJson(String milestonesJson) { this.milestonesJson = milestonesJson; }
+    public String getEligibilityRequirements() { return eligibilityRequirements; }
+    public void setEligibilityRequirements(String eligibilityRequirements) { this.eligibilityRequirements = eligibilityRequirements; }
 
     // Builder
     public static Builder builder() { return new Builder(); }

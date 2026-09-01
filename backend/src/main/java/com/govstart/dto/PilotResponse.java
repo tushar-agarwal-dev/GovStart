@@ -21,6 +21,14 @@ public class PilotResponse {
     private Integer currentProgress;
     private LocalDateTime createdAt;
 
+    private Boolean deptSigned;
+    private Boolean startupSigned;
+    private LocalDateTime signedAt;
+    private String contractTermsJson;
+    private String validatorName;
+    private String validationStatus;
+    private String kpiCurrentValuesJson;
+
     public PilotResponse() {}
 
     public PilotResponse(Long id, Long problemId, String problemTitle, Long startupId, String startupName,
@@ -78,6 +86,21 @@ public class PilotResponse {
     public void setCurrentProgress(Integer currentProgress) { this.currentProgress = currentProgress; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public Boolean getDeptSigned() { return deptSigned; }
+    public void setDeptSigned(Boolean deptSigned) { this.deptSigned = deptSigned; }
+    public Boolean getStartupSigned() { return startupSigned; }
+    public void setStartupSigned(Boolean startupSigned) { this.startupSigned = startupSigned; }
+    public LocalDateTime getSignedAt() { return signedAt; }
+    public void setSignedAt(LocalDateTime signedAt) { this.signedAt = signedAt; }
+    public String getContractTermsJson() { return contractTermsJson; }
+    public void setContractTermsJson(String contractTermsJson) { this.contractTermsJson = contractTermsJson; }
+    public String getValidatorName() { return validatorName; }
+    public void setValidatorName(String validatorName) { this.validatorName = validatorName; }
+    public String getValidationStatus() { return validationStatus; }
+    public void setValidationStatus(String validationStatus) { this.validationStatus = validationStatus; }
+    public String getKpiCurrentValuesJson() { return kpiCurrentValuesJson; }
+    public void setKpiCurrentValuesJson(String kpiCurrentValuesJson) { this.kpiCurrentValuesJson = kpiCurrentValuesJson; }
 
     // Builder
     public static Builder builder() { return new Builder(); }

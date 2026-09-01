@@ -150,7 +150,7 @@ public class PilotController {
         List<PilotUpdate> updates = pilotUpdateRepository.findByPilotIdOrderBySubmittedAtDesc(pilot.getId());
         int progress = updates.isEmpty() ? 0 : updates.get(0).getProgressPercent();
 
-        return PilotResponse.builder()
+        PilotResponse response = PilotResponse.builder()
                 .id(pilot.getId())
                 .problemId(pilot.getProblem().getId())
                 .problemTitle(pilot.getProblem().getTitle())
@@ -168,5 +168,43 @@ public class PilotController {
                 .currentProgress(progress)
                 .createdAt(pilot.getCreatedAt())
                 .build();
+
+        response.setDeptSigned(pilot.getDeptSigned());
+        response.setStartupSigned(pilot.getStartupSigned());
+        response.setSignedAt(pilot.getSignedAt());
+        response.setContractTermsJson(pilot.getContractTermsJson());
+        response.setValidatorName(pilot.getValidatorName());
+        response.setValidationStatus(pilot.getValidationStatus());
+        response.setKpiCurrentValuesJson(pilot.getKpiCurrentValuesJson());
+
+        return response;
+    }
+
+    @PostMapping("/{id}/sign-contract")
+    public ResponseEntity<?> signContract(@PathVariable Long id, @RequestParam String role, @RequestBody(required = false) String contractTermsJson, Authentication authentication) {
+        User user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        try {
+            Pilot pilot = pilotService.signContract(user.getId(), id, role, contractTermsJson);
+            auditLogService.logAction(user.getEmail(), "CONTRACT_SIGNED", "Digitally signed pilot contract as " + role + " for Pilot ID " + id);
+            return ResponseEntity.ok(convertToResponse(pilot));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/updates/{updateId}/validate")
+    public ResponseEntity<?> validateMilestone(@PathVariable Long updateId, @RequestParam String validatorName, @RequestParam String status, @RequestBody(required = false) String comments, Authentication authentication) {
+        User user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        try {
+            PilotUpdate update = pilotService.validateMilestone(updateId, validatorName, status, comments);
+            auditLogService.logAction(user.getEmail(), "MILESTONE_VALIDATED", "Independent Technical Expert (" + validatorName + ") validated milestone update ID " + updateId + " with status: " + status);
+            return ResponseEntity.ok(update);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

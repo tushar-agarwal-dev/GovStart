@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Building2, 
-  Rocket, 
   GraduationCap, 
   ShieldCheck, 
   LogOut, 
@@ -9,17 +8,13 @@ import {
   CheckCircle, 
   AlertTriangle, 
   ArrowRight, 
-  Users, 
   BarChart3, 
   Clock, 
   Award, 
   ChevronRight, 
-  UserCheck, 
-  FileText, 
-  Briefcase, 
-  TrendingUp, 
   Cpu, 
-  DollarSign
+  Lock, 
+  FileCode
 } from 'lucide-react';
 
 // Types
@@ -29,6 +24,28 @@ interface AuthState {
   role: 'DEPARTMENT' | 'STARTUP' | 'EXPERT' | 'ADMIN';
   userId: number;
   name: string;
+}
+
+interface KPIItem {
+  id?: string;
+  name: string;
+  description: string;
+  baseline: string;
+  target: string;
+  current?: string;
+  unit: string;
+  method: string;
+  frequency: string;
+  weight: number;
+  status?: 'ACHIEVED' | 'IN_PROGRESS' | 'PENDING';
+}
+
+interface MilestoneItem {
+  name: string;
+  target: string;
+  criteria: string;
+  paymentPercentage: number;
+  status?: 'COMPLETED' | 'IN_PROGRESS' | 'PENDING';
 }
 
 interface Problem {
@@ -43,12 +60,32 @@ interface Problem {
   timelineDays: number;
   status: string;
   createdAt: string;
+
+  // Extended fields
+  category?: string;
+  location?: string;
+  contactPerson?: string;
+  currentProblem?: string;
+  existingProcess?: string;
+  targetBeneficiaries?: string;
+  desiredOutcome?: string;
+  baselinePerformance?: string;
+  targetPerformance?: string;
+  expectedImpact?: string;
+  geographicScope?: string;
+  dpiitRequired?: boolean;
+  techRequirements?: string;
+  minCriteria?: string;
+  evaluationWeightsJson?: string;
+  kpisJson?: string;
+  milestonesJson?: string;
+  eligibilityRequirements?: string;
 }
 
 interface Recommendation {
   id: number;
   problem: { id: number; title: string };
-  startup: { id: number; companyName: string; description: string; tags: string[]; isDpiitVerified: boolean; dpiitNumber: string };
+  startup: { id: number; companyName: string; description: string; domain?: string; tags: string[]; isDpiitVerified: boolean; dpiitNumber: string };
   ruleScore: number;
   llmScore: number;
   finalWeightedScore: number;
@@ -56,26 +93,6 @@ interface Recommendation {
   rankPosition: number;
 }
 
-interface ExpertMatch {
-  expert: { id: number; user: { name: string }; expertiseDomain: string; designation: string; expertTags: string[] };
-  matchingScore: number;
-}
-
-interface Evaluation {
-  id: number;
-  problemId: number;
-  problemTitle: string;
-  startupId: number;
-  startupName: string;
-  expertName: string;
-  feasibilityScore: number;
-  innovationScore: number;
-  teamScore: number;
-  costScore: number;
-  avgScore: number;
-  comments: string;
-  createdAt: string;
-}
 
 interface Pilot {
   id: number;
@@ -94,6 +111,15 @@ interface Pilot {
   status: string;
   currentProgress: number;
   createdAt: string;
+
+  // Extended contract & validation fields
+  deptSigned?: boolean;
+  startupSigned?: boolean;
+  signedAt?: string;
+  contractTermsJson?: string;
+  validatorName?: string;
+  validationStatus?: string;
+  kpiCurrentValuesJson?: string;
 }
 
 interface PilotUpdate {
@@ -105,6 +131,13 @@ interface PilotUpdate {
   attachmentName?: string;
   attachmentHash?: string;
   submittedAt: string;
+
+  // Extended validation fields
+  kpiMeasurementsJson?: string;
+  evidenceRef?: string;
+  validationStatus?: string;
+  validatorComments?: string;
+  validatedAt?: string;
 }
 
 interface User {
@@ -155,8 +188,6 @@ export default function App() {
   const [problems, setProblems] = useState<Problem[]>([]);
   const [activeProblem, setActiveProblem] = useState<Problem | null>(null);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [suggestedExperts, setSuggestedExperts] = useState<ExpertMatch[]>([]);
-  const [problemEvaluations, setProblemEvaluations] = useState<Evaluation[]>([]);
   const [pilots, setPilots] = useState<Pilot[]>([]);
   const [activePilot, setActivePilot] = useState<Pilot | null>(null);
   const [pilotUpdates, setPilotUpdates] = useState<PilotUpdate[]>([]);
@@ -164,9 +195,61 @@ export default function App() {
   const [adminUsers, setAdminUsers] = useState<User[]>([]);
   const [adminAnalytics, setAdminAnalytics] = useState<Analytics | null>(null);
 
-  // Pilot Modal
-  const [showPilotModal, setShowPilotModal] = useState(false);
-  const [pilotTab, setPilotTab] = useState<'milestones' | 'legal'>('milestones');
+  // FEATURE 1: 6-Step Challenge Creation Wizard State
+  const [createStep, setCreateStep] = useState<number>(1);
+  const [wizardForm, setWizardForm] = useState({
+    title: 'AI-Based Smart Landfill & Organics Waste Sorter',
+    department: 'Urban Development & Municipal Cleanliness Department',
+    contactPerson: 'Shri Ramesh Patil (Nodal Officer)',
+    category: 'Waste Management & CleanTech',
+    location: 'Shivaji Nagar Landfill, District Nanded',
+    description: 'Deploys an automated multispectral vision & robotic sorting system to separate municipal solid waste into organic and recyclable streams at the dumping site.',
+    currentProblem: 'Manual sorting at municipal dumping sites is unsafe, slow, and achieves less than 35% segregation efficiency, causing landfill fires and environmental contamination.',
+    existingProcess: 'Manual labor teams sorting mixed waste using basic conveyors without automated detection or sensor analytics.',
+    targetBeneficiaries: '350,000 citizens of Nanded Municipality and local sanitation worker teams.',
+    desiredOutcome: 'Automated 90%+ segregation accuracy of organic waste at landfill entry within 48 hours of dumping.',
+    baselinePerformance: '35% manual segregation accuracy, 15-day processing lag per batch.',
+    targetPerformance: '90%+ automated segregation accuracy, under 48-hour batch processing.',
+    expectedImpact: 'Elimination of landfill methane fires, 60% reduction in landfill volume, and high-purity organic compost generation.',
+    timelineDays: 120,
+    geographicScope: 'Shivaji Nagar Landfill & Ward 12 Transfer Station',
+    dpiitRequired: true,
+    techRequirements: 'Edge AI computer vision cameras, robotic pneumatics, IP65 ruggedized enclosures, cloud dashboard integration.',
+    minCriteria: 'Startup must possess working functional prototype, minimum 1 deployment, and valid DPIIT registration.',
+    budgetMin: 800000,
+    budgetMax: 1500000,
+    evalWeights: { feasibility: 30, innovation: 20, scalability: 20, impact: 20, risk: 10 }
+  });
+
+  const [kpiList, setKpiList] = useState<KPIItem[]>([
+    { name: 'Segregation Accuracy', description: 'Purity % of separated organic stream', baseline: '35%', target: '90%', unit: '%', method: 'Lab Sampling', frequency: 'Daily', weight: 40 },
+    { name: 'Processing Time per Ton', description: 'Minutes to sort 1 metric ton of mixed waste', baseline: '120 min', target: '25 min', unit: 'min', method: 'Sensor Logs', frequency: 'Continuous', weight: 30 },
+    { name: 'Landfill Diverted Volume', description: 'Volume % diverted away from main dump slope', baseline: '10%', target: '60%', unit: '%', method: 'Weighbridge Metrics', frequency: 'Weekly', weight: 30 }
+  ]);
+
+  const [milestoneList] = useState<MilestoneItem[]>([
+    { name: 'Milestone 1: Site Setup & Equipment Erection', target: 'Day 30', criteria: 'Enclosure setup & vision sensor installation', paymentPercentage: 25 },
+    { name: 'Milestone 2: Calibration & Initial Sorting Runs', target: 'Day 60', criteria: '50 tons sorted with >75% accuracy', paymentPercentage: 35 },
+    { name: 'Milestone 3: Full Capacity Operation & Independent Validation', target: 'Day 120', criteria: 'Continuous 90%+ sorting accuracy & independent expert sign-off', paymentPercentage: 40 }
+  ]);
+
+  // FEATURE 2: Explainable AI Match & Scorecard State
+  const [activeMatchingStep, setActiveMatchingStep] = useState<number>(6);
+  const [selectedMatchStartup, setSelectedMatchStartup] = useState<Recommendation | null>(null);
+
+  // FEATURE 3: E-Signature Contract State
+  const [contractTab, setContractTab] = useState<'nda' | 'pilot-agreement' | 'privacy' | 'ip' | 'cybersecurity'>('pilot-agreement');
+  const [contractSignedDept, setContractSignedDept] = useState(false);
+  const [contractSignedStartup, setContractSignedStartup] = useState(false);
+  const [selectedContractRec, setSelectedContractRec] = useState<Recommendation | null>(null);
+
+  // FEATURE 4: Active Pilot KPI Tracker & Independent Validation State
+  const [kpiUpdateValues, setKpiUpdateValues] = useState<{ [key: string]: string }>({});
+  const [evidenceRefInput, setEvidenceRefInput] = useState('');
+  const [validatorNameInput] = useState('Prof. Ravindra Kulkarni (COEP Tech)');
+  const [validatorCommentsInput, setValidatorCommentsInput] = useState('');
+
+  // Modals & Misc
   const [adminTab, setAdminTab] = useState<'overview' | 'audit'>('overview');
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [ledgerIntegrity, setLedgerIntegrity] = useState<{ verified: boolean; corruptedLogId: number | null; totalChecked: number } | null>(null);
@@ -174,31 +257,16 @@ export default function App() {
   const [publishToGem, setPublishToGem] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<{ name: string; hash: string } | null>(null);
   const [showDpiitModal, setShowDpiitModal] = useState(false);
-  const [pilotForm, setPilotForm] = useState({ scope: '', budget: 1500000, startDate: '', endDate: '' });
-  const [selectedStartupRec, setSelectedStartupRec] = useState<Recommendation | null>(null);
 
-  // Pilot Update Form
+  // Forms
   const [progressPercent, setProgressPercent] = useState(0);
   const [milestoneName, setMilestoneName] = useState('');
   const [updateNotes, setUpdateNotes] = useState('');
-
-  // Decision Form
   const [decisionType, setDecisionType] = useState('SCALE');
   const [decisionRemarks, setDecisionRemarks] = useState('');
-
-  // Evaluation Score Form
   const [evalScores, setEvalScores] = useState({ feasibility: 4, innovation: 4, team: 4, cost: 4, comments: '' });
 
-  // Problem creation form
-  const [newProblem, setNewProblem] = useState({ title: '', description: '', tags: '', budgetMin: 500000, budgetMax: 2000000, timelineDays: 180 });
-
-  // Toast utility
-  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
-  };
-
-  // Safe fetch helper
+  // API Helper
   const API_BASE = import.meta.env.VITE_API_BASE || '';
 
   const apiFetch = async (url: string, options: RequestInit = {}) => {
@@ -224,34 +292,30 @@ export default function App() {
       }
       return await response.json();
     } catch (e: any) {
-      if (e.message !== 'Unauthorized') {
-        showToast(e.message || 'API request failed', 'error');
-      }
       throw e;
     }
   };
 
-  // Sync auth with storage & change default view
+  // Toast utility
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  };
+
+  // On Auth Change / App Load
   useEffect(() => {
     if (auth) {
       localStorage.setItem('govstart_auth', JSON.stringify(auth));
-      setView('dashboard');
       loadDashboardData();
     } else {
       localStorage.removeItem('govstart_auth');
-      setView('landing');
     }
   }, [auth]);
 
   const loadDashboardData = async () => {
-    if (!auth) return;
     try {
-      if (auth.role === 'DEPARTMENT') {
-        const list = await apiFetch('/api/problems');
-        setProblems(list);
-        const pilotList = await apiFetch('/api/pilots');
-        setPilots(pilotList);
-      } else if (auth.role === 'STARTUP') {
+      if (!auth) return;
+      if (auth.role === 'DEPARTMENT' || auth.role === 'STARTUP') {
         const list = await apiFetch('/api/problems');
         setProblems(list);
         const pilotList = await apiFetch('/api/pilots');
@@ -267,11 +331,33 @@ export default function App() {
         const logs = await apiFetch('/api/integration/audit-logs');
         setAuditLogs(logs);
       }
-    } catch (e) {
-      console.error(e);
+    } catch (e) {}
+  };
+
+  const handleLogout = () => {
+    setAuth(null);
+    setView('landing');
+    showToast('Logged out successfully.');
+  };
+
+  // Auto-fill credential helper
+  const fillCredentials = (roleKey: 'dept' | 'startup' | 'expert' | 'admin') => {
+    if (roleKey === 'admin') {
+      setLoginEmail('admin@govstart.gov.in');
+      setLoginPassword('AdminPass_GovStart_2026!');
+    } else if (roleKey === 'dept') {
+      setLoginEmail('dept@govstart.gov.in');
+      setLoginPassword('DeptPass_GovStart_2026!');
+    } else if (roleKey === 'startup') {
+      setLoginEmail('ecotech@startups.in');
+      setLoginPassword('StartupPass_GovStart_2026!');
+    } else if (roleKey === 'expert') {
+      setLoginEmail('kulkarni@coep.ac.in');
+      setLoginPassword('ExpertPass_GovStart_2026!');
     }
   };
 
+  // Auth: Submit Login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -280,106 +366,114 @@ export default function App() {
         body: JSON.stringify({ email: loginEmail, password: loginPassword })
       });
       setAuth(result);
-      showToast('Logged in successfully!');
-    } catch (err) {}
+      setView('dashboard');
+      showToast(`Welcome back, ${result.name}!`);
+    } catch (err: any) {
+      showToast('Invalid credentials. Please try again.', 'error');
+    }
   };
 
+  // Auth: Register
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const payload: any = {
-        name: registerForm.name,
-        email: registerForm.email,
-        password: registerForm.password,
-        role: registerForm.role
-      };
-
-      if (registerForm.role === 'DEPARTMENT') {
-        payload.deptName = registerForm.deptName;
-        payload.deptAddress = registerForm.deptAddress;
-        payload.deptContactPerson = registerForm.deptContactPerson;
-      } else if (registerForm.role === 'STARTUP') {
-        payload.companyName = registerForm.companyName;
-        payload.startupDescription = registerForm.startupDescription;
-        payload.startupDomain = registerForm.startupDomain;
-        payload.startupTags = registerForm.startupTagsString.split(',').map(t => t.trim()).filter(Boolean);
-        payload.teamSize = registerForm.teamSize;
-        payload.foundedYear = registerForm.foundedYear;
-        payload.dpiitNumber = registerForm.dpiitNumber;
-      } else if (registerForm.role === 'EXPERT') {
-        payload.expertDomain = registerForm.expertDomain;
-        payload.expertDesignation = registerForm.expertDesignation;
-        payload.expertTags = registerForm.expertTagsString.split(',').map(t => t.trim()).filter(Boolean);
+      let tagsArray: string[] = [];
+      if (registerForm.role === 'STARTUP' && registerForm.startupTagsString) {
+        tagsArray = registerForm.startupTagsString.split(',').map(t => t.trim()).filter(Boolean);
+      } else if (registerForm.role === 'EXPERT' && registerForm.expertTagsString) {
+        tagsArray = registerForm.expertTagsString.split(',').map(t => t.trim()).filter(Boolean);
       }
 
       await apiFetch('/api/auth/register', {
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          name: registerForm.name,
+          email: registerForm.email,
+          password: registerForm.password,
+          role: registerForm.role,
+          deptName: registerForm.deptName,
+          deptAddress: registerForm.deptAddress,
+          deptContactPerson: registerForm.deptContactPerson,
+          companyName: registerForm.companyName,
+          startupDescription: registerForm.startupDescription,
+          startupDomain: registerForm.startupDomain,
+          startupTags: tagsArray,
+          teamSize: registerForm.teamSize,
+          foundedYear: registerForm.foundedYear,
+          dpiitNumber: registerForm.dpiitNumber,
+          expertDomain: registerForm.expertDomain,
+          expertDesignation: registerForm.expertDesignation,
+          expertTags: tagsArray
+        })
       });
 
-      showToast('Registration successful! Please log in.');
+      showToast('Account created successfully! Please log in.');
       setView('login');
-      setLoginEmail(registerForm.email);
-      setLoginPassword('');
-    } catch (err) {}
-  };
-
-  const handleLogout = () => {
-    setAuth(null);
-    setView('landing');
-  };
-
-  // Quick helper to fill credentials for demo
-  const fillCredentials = (role: string) => {
-    if (role === 'admin') {
-      setLoginEmail('admin@govstart.gov.in');
-      setLoginPassword('AdminPass_GovStart_2026!');
-    } else if (role === 'dept') {
-      setLoginEmail('dept@govstart.gov.in');
-      setLoginPassword('DeptPass_GovStart_2026!');
-    } else if (role === 'startup') {
-      setLoginEmail('ecotech@startups.in');
-      setLoginPassword('StartupPass_GovStart_2026!');
-    } else if (role === 'expert') {
-      setLoginEmail('kulkarni@coep.ac.in');
-      setLoginPassword('ExpertPass_GovStart_2026!');
+    } catch (err: any) {
+      showToast(err.message || 'Registration failed', 'error');
     }
   };
 
-
-  // Department: Create problem
-  const handleCreateProblem = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // FEATURE 1: 6-Step Challenge Creation Submit
+  const handlePublishChallenge = async () => {
     try {
       const payload = {
-        ...newProblem,
-        tags: newProblem.tags.split(',').map(t => t.trim()).filter(Boolean)
+        title: wizardForm.title,
+        description: wizardForm.description,
+        tags: [wizardForm.category, 'Waste Management', 'AI', 'Recycling'],
+        budgetMin: wizardForm.budgetMin,
+        budgetMax: wizardForm.budgetMax,
+        timelineDays: wizardForm.timelineDays,
+        category: wizardForm.category,
+        location: wizardForm.location,
+        contactPerson: wizardForm.contactPerson,
+        currentProblem: wizardForm.currentProblem,
+        existingProcess: wizardForm.existingProcess,
+        targetBeneficiaries: wizardForm.targetBeneficiaries,
+        desiredOutcome: wizardForm.desiredOutcome,
+        baselinePerformance: wizardForm.baselinePerformance,
+        targetPerformance: wizardForm.targetPerformance,
+        expectedImpact: wizardForm.expectedImpact,
+        geographicScope: wizardForm.geographicScope,
+        dpiitRequired: wizardForm.dpiitRequired,
+        techRequirements: wizardForm.techRequirements,
+        minCriteria: wizardForm.minCriteria,
+        evaluationWeightsJson: JSON.stringify(wizardForm.evalWeights),
+        kpisJson: JSON.stringify(kpiList),
+        milestonesJson: JSON.stringify(milestoneList),
+        eligibilityRequirements: wizardForm.minCriteria
       };
-      await apiFetch('/api/problems', {
+
+      const created = await apiFetch('/api/problems', {
         method: 'POST',
         body: JSON.stringify(payload)
       });
-      showToast('Challenge posted successfully!');
-      setNewProblem({ title: '', description: '', tags: '', budgetMin: 500000, budgetMax: 2000000, timelineDays: 180 });
+
+      showToast(`Challenge ID #${created.id} published successfully to matching engine!`);
       loadDashboardData();
       setView('dashboard');
-    } catch (err) {}
+    } catch (e: any) {
+      showToast(e.message || 'Failed to publish challenge', 'error');
+    }
   };
 
-  // View Problem Details
+  // View Problem Details / AI Discovery
   const viewProblemDetails = async (problem: Problem) => {
     setActiveProblem(problem);
-    setView('problem-detail');
+    setView('matching');
+    setActiveMatchingStep(1);
+
+    // Sequence active processing steps for UI feedback
+    setTimeout(() => setActiveMatchingStep(2), 400);
+    setTimeout(() => setActiveMatchingStep(3), 800);
+    setTimeout(() => setActiveMatchingStep(4), 1200);
+    setTimeout(() => setActiveMatchingStep(5), 1600);
+    setTimeout(() => setActiveMatchingStep(6), 2000);
+
     try {
-      // Fetch recommendations (which matches and saves them)
       const recs = await apiFetch(`/api/problems/${problem.id}/recommendations`);
       setRecommendations(recs);
-      // Fetch suggested experts
-      const exps = await apiFetch(`/api/evaluations/problem/${problem.id}/experts/suggested`);
-      setSuggestedExperts(exps);
-      // Fetch evaluations
-      const evals = await apiFetch(`/api/evaluations/problem/${problem.id}`);
-      setProblemEvaluations(evals);
+      if (recs.length > 0) setSelectedMatchStartup(recs[0]);
     } catch (e) {}
   };
 
@@ -389,257 +483,255 @@ export default function App() {
       showToast('Running algorithms & Gemini semantic evaluation...');
       const recs = await apiFetch(`/api/problems/${problemId}/recommendations`, { method: 'POST' });
       setRecommendations(recs);
+      if (recs.length > 0) setSelectedMatchStartup(recs[0]);
       showToast('Recommendations matching completed!');
     } catch (e) {}
   };
 
-  // Assign expert
-  const assignExpert = (expertName: string) => {
-    showToast(`Expert ${expertName} assigned to evaluate proposals.`);
+  // FEATURE 3: Open Contract Generation Stage
+  const openContractStage = (rec: Recommendation) => {
+    setSelectedContractRec(rec);
+    setContractSignedDept(false);
+    setContractSignedStartup(false);
+    setContractTab('pilot-agreement');
+    setView('contract');
   };
 
-  // Open Pilot Modal
-  const openPilotCreation = (rec: Recommendation) => {
-    setSelectedStartupRec(rec);
-    setPilotForm({
-      scope: `Deployment of pilot for: ${activeProblem?.title}`,
-      budget: activeProblem?.budgetMax || 1500000,
-      startDate: new Date().toISOString().split('T')[0],
-      endDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-    });
-    setShowPilotModal(true);
+  // Sign Contract (Dept / Startup)
+  const handleSignContract = (party: 'dept' | 'startup') => {
+    if (party === 'dept') {
+      setContractSignedDept(true);
+      showToast('Department Nodal Representative signature applied!');
+    } else {
+      setContractSignedStartup(true);
+      showToast('Startup CEO / Authorized Officer signature applied!');
+    }
   };
 
-  // Start pilot
-  const submitLaunchPilot = async () => {
-    if (!selectedStartupRec || !activeProblem) return;
+  // Launch Pilot Sandbox after Contract Signature
+  const submitLaunchPilotFromContract = async () => {
+    if (!selectedContractRec || !activeProblem) return;
     try {
       const payload = {
         problemId: activeProblem.id,
-        startupId: selectedStartupRec.startup.id,
-        scope: pilotForm.scope,
-        startDate: pilotForm.startDate,
-        endDate: pilotForm.endDate,
-        budget: pilotForm.budget
+        startupId: selectedContractRec.startup.id,
+        scope: activeProblem.desiredOutcome || `Deployment of sandbox pilot for: ${activeProblem.title}`,
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date(Date.now() + (activeProblem.timelineDays || 120) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        budget: activeProblem.budgetMax || 1500000
       };
-      await apiFetch('/api/pilots', {
+      const pilot = await apiFetch('/api/pilots', {
         method: 'POST',
         body: JSON.stringify(payload)
       });
-      showToast('Pilot sandbox launched successfully!');
-      setShowPilotModal(false);
+
+      // Sign contract on backend
+      await apiFetch(`/api/pilots/${pilot.id}/sign-contract?role=DEPARTMENT`, { method: 'POST' });
+      await apiFetch(`/api/pilots/${pilot.id}/sign-contract?role=STARTUP`, { method: 'POST' });
+
+      showToast('Escrow budget locked & Sandbox Pilot activated!');
       loadDashboardData();
-      setView('dashboard');
-    } catch (e) {}
+      viewPilotWorkspace(pilot);
+    } catch (e: any) {
+      showToast(e.message || 'Failed to launch pilot', 'error');
+    }
   };
 
-  // View Pilot Workspace
+  // View Pilot Workspace (FEATURE 4: KPI Dashboard & Validation)
   const viewPilotWorkspace = async (pilot: Pilot) => {
     setActivePilot(pilot);
     setView('pilot-workspace');
     setProgressPercent(pilot.currentProgress);
     setMilestoneName('');
     setUpdateNotes('');
+    setEvidenceRefInput('');
+    setValidatorCommentsInput('');
+
     try {
       const updates = await apiFetch(`/api/pilots/${pilot.id}/updates`);
       setPilotUpdates(updates);
+
+      // Parse KPI values if present
+      if (pilot.kpiCurrentValuesJson) {
+        try {
+          setKpiUpdateValues(JSON.parse(pilot.kpiCurrentValuesJson));
+        } catch (e) {}
+      }
     } catch (e) {}
   };
 
-  // Startup: submit progress
+  // Startup: submit progress update with KPI measurements
   const handleSubmitProgress = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!activePilot) return;
     try {
       const payload = {
-        progressPercent,
+        progressPercent: Number(progressPercent),
         notes: updateNotes,
-        milestoneName,
-        attachmentName: uploadedFile?.name || null,
-        attachmentHash: uploadedFile?.hash || null
+        milestoneName: milestoneName || `Milestone ${pilotUpdates.length + 1}`,
+        attachmentName: uploadedFile?.name || 'Milestone_Deliverable_Proof.pdf',
+        attachmentHash: uploadedFile?.hash || 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        kpiMeasurementsJson: JSON.stringify(kpiUpdateValues),
+        evidenceRef: evidenceRefInput || 'REF-DOC-98231'
       };
+
       await apiFetch(`/api/pilots/${activePilot.id}/updates`, {
         method: 'POST',
         body: JSON.stringify(payload)
       });
-      showToast('Milestone progress uploaded!');
-      // reload
+
+      showToast('Milestone proof & KPI measurements submitted for validation!');
+      setUploadedFile(null);
       const updatedPilot = await apiFetch(`/api/pilots/${activePilot.id}`);
       setActivePilot(updatedPilot);
       const updates = await apiFetch(`/api/pilots/${activePilot.id}/updates`);
       setPilotUpdates(updates);
-      setMilestoneName('');
-      setUpdateNotes('');
-      setUploadedFile(null);
-    } catch (e) {}
+    } catch (e: any) {
+      showToast(e.message || 'Failed to submit milestone update', 'error');
+    }
   };
 
-  // DPIIT registry verifier
-  const handleVerifyDpiit = async (number: string) => {
+  // FEATURE 4: Independent Validation Submission
+  const handleValidateMilestone = async (updateId: number, status: 'VALIDATED' | 'REJECTED') => {
+    if (!activePilot) return;
     try {
-      showToast('Connecting to DPIIT Startup Registry API...');
+      await apiFetch(`/api/pilots/updates/${updateId}/validate?validatorName=${encodeURIComponent(validatorNameInput)}&status=${status}`, {
+        method: 'POST',
+        body: validatorCommentsInput || 'Independent technical validation completed successfully.'
+      });
+
+      if (status === 'VALIDATED') {
+        // Automatically disburse escrow tranche upon validation
+        await apiFetch(`/api/pilots/updates/${updateId}/approve`, { method: 'POST' });
+        showToast('Milestone validated by Independent Expert & Escrow tranche released!');
+      } else {
+        showToast('Milestone validation rejected.', 'error');
+      }
+
+      const updatedPilot = await apiFetch(`/api/pilots/${activePilot.id}`);
+      setActivePilot(updatedPilot);
+      const updates = await apiFetch(`/api/pilots/${activePilot.id}/updates`);
+      setPilotUpdates(updates);
+    } catch (e: any) {
+      showToast(e.message || 'Failed to validate milestone', 'error');
+    }
+  };
+
+  // DPIIT Verification Popup
+  const checkDpiitRegistry = async (number: string) => {
+    try {
       const data = await apiFetch(`/api/integration/dpiit/${number}`);
       setSelectedDpiitData(data);
       setShowDpiitModal(true);
-    } catch (e) {
-      showToast('DPIIT registry lookup failed', 'error');
-    }
+    } catch (e) {}
   };
 
-  // Verify Chained Ledger Integrity
-  const handleVerifyLedger = async () => {
+  // Audit Ledger Integrity Check
+  const verifyLedgerIntegrity = async () => {
     try {
-      showToast('Running SHA-256 cryptographic check on all audit blocks...');
       const data = await apiFetch('/api/integration/audit-logs/verify', { method: 'POST' });
       setLedgerIntegrity(data);
       if (data.verified) {
-        showToast('Ledger Integrity Verified. 0 Tampered Blocks Detected.');
+        showToast('Ledger Integrity Verified! All SHA-256 block hashes are intact.');
       } else {
-        showToast(`Ledger Corruption Detected at Block ID: ${data.corruptedLogId}!`, 'error');
+        showToast(`ALERT: Corruption detected at Audit Log ID #${data.corruptedLogId}!`, 'error');
       }
-      // reload logs
       const logs = await apiFetch('/api/integration/audit-logs');
       setAuditLogs(logs);
-    } catch (e) {
-      showToast('Ledger verification failed', 'error');
-    }
+    } catch (e) {}
   };
 
-  // Publish Pilot to GeM
-  const handlePublishToGem = async (pilotId: number, catalogTitle: string) => {
+  // GeM Catalog Publish
+  const handleGeMPublish = async (pilotId: number) => {
     try {
-      showToast('Connecting to GeM Portal Marketplace APIs...');
       const response = await apiFetch('/api/integration/gem/publish', {
         method: 'POST',
-        body: JSON.stringify({ pilotId, catalogTitle })
+        body: JSON.stringify({ pilotId, catalogTitle: activePilot?.problemTitle })
       });
-      showToast(`Published successfully to GeM Portal! ID: ${response.gemCatalogId}`);
-      loadDashboardData();
-    } catch (e) {
-      showToast('Failed to publish to GeM', 'error');
-    }
-  };
-
-  // Simulate file upload with AES-256 local mock encryption
-  const simulateFileUpload = () => {
-    const mockFiles = [
-      { name: "technical_schematic_v2.pdf", hash: "9a4f2c8d3e1b7f0a5c8d3e1b7f0a5c8d3e1b7f0a5c8d3e1b7f0a5c8d3e1b7f0a" },
-      { name: "software_architecture_confidential.pdf", hash: "ecotech_a1f9e2b83c1827e8391782deac7728f3918a2cd89f2139bdeac2a89f92ce" },
-      { name: "operational_sla_metrics.csv", hash: "f39b1a8d29837cd82c18d9f3a9a1029c8e82ef39cd28d7e7e8ab219d3cd2f2ef" }
-    ];
-    const file = mockFiles[Math.floor(Math.random() * mockFiles.length)];
-    setUploadedFile(file);
-    showToast(`IP Protected Vault: Encrypted ${file.name} successfully!`);
-  };
-
-  // Department: approve milestone
-  const handleApproveMilestone = async (updateId: number) => {
-    if (!activePilot) return;
-    try {
-      showToast('Processing milestone approval & escrow release...');
-      await apiFetch(`/api/pilots/updates/${updateId}/approve`, {
-        method: 'POST'
-      });
-      showToast('Milestone approved! Funds released from escrow.');
-      // reload
-      const updatedPilot = await apiFetch(`/api/pilots/${activePilot.id}`);
-      setActivePilot(updatedPilot);
-      const updates = await apiFetch(`/api/pilots/${activePilot.id}/updates`);
-      setPilotUpdates(updates);
+      showToast(`Published to GeM Portal! Catalog ID: ${response.gemCatalogId}`);
     } catch (e) {}
   };
 
-  // Simulate SLA Expiry Trigger
-  const handleSlaTrigger = async (updateId: number) => {
-    if (!activePilot) return;
-    try {
-      showToast('Simulating 7-day SLA expiry...');
-      await apiFetch(`/api/pilots/updates/${updateId}/sla-trigger`, {
-        method: 'POST'
-      });
-      showToast('SLA Expired! Milestone auto-approved & funds released.');
-      // reload
-      const updatedPilot = await apiFetch(`/api/pilots/${activePilot.id}`);
-      setActivePilot(updatedPilot);
-      const updates = await apiFetch(`/api/pilots/${activePilot.id}/updates`);
-      setPilotUpdates(updates);
-    } catch (e) {}
-  };
-
-  // Department: make decision
+  // Decision submit
   const handleSubmitDecision = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!activePilot) return;
     try {
-      const payload = {
-        pilotId: activePilot.id,
-        decisionType,
-        remarks: decisionRemarks
-      };
       await apiFetch('/api/pilots/decision', {
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          pilotId: activePilot.id,
+          decisionType,
+          remarks: decisionRemarks
+        })
       });
-      showToast(`Final decision made: ${decisionType}`);
-      
-      if (publishToGem && (decisionType === 'SCALE' || decisionType === 'PROCURE')) {
-        await handlePublishToGem(activePilot.id, activePilot.problemTitle + " - Certified Innovative Solution");
+
+      if (publishToGem) {
+        await handleGeMPublish(activePilot.id);
       }
-      setPublishToGem(false);
+
+      showToast(`Final decision (${decisionType}) submitted successfully!`);
       loadDashboardData();
       setView('dashboard');
-    } catch (e) {}
+    } catch (e: any) {
+      showToast(e.message || 'Failed to submit decision', 'error');
+    }
   };
 
-  // Expert: Submit Score Card
-  const handleSubmitEvaluation = async (e: React.FormEvent) => {
+  // Expert: Submit Scorecard
+  const handleSubmitEvaluation = async (e: React.FormEvent, problemId: number, startupId: number) => {
     e.preventDefault();
-    if (!activeProblem) return;
-    // For demo, we evaluate one startup
-    // We pick the first recommended startup in the list for scoring
-    if (recommendations.length === 0) {
-      showToast('No recommended startup found in queue.', 'error');
-      return;
-    }
-    const startupId = recommendations[0].startup.id;
     try {
-      const payload = {
-        problemId: activeProblem.id,
-        startupId,
-        feasibilityScore: evalScores.feasibility,
-        innovationScore: evalScores.innovation,
-        teamScore: evalScores.team,
-        costScore: evalScores.cost,
-        comments: evalScores.comments
-      };
       await apiFetch('/api/evaluations', {
         method: 'POST',
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          problemId,
+          startupId,
+          feasibilityScore: evalScores.feasibility,
+          innovationScore: evalScores.innovation,
+          teamScore: evalScores.team,
+          costScore: evalScores.cost,
+          comments: evalScores.comments
+        })
       });
-      showToast('Evaluation scorecard submitted!');
-      setEvalScores({ feasibility: 4, innovation: 4, team: 4, cost: 4, comments: '' });
+      showToast('Expert evaluation scorecard submitted!');
       loadDashboardData();
       setView('dashboard');
-    } catch (e) {}
+    } catch (e: any) {
+      showToast(e.message || 'Failed to submit evaluation', 'error');
+    }
   };
 
-  // Admin: Toggle status
+  // Admin: User Activation Toggle
   const toggleUserStatus = async (userId: number, currentStatus: string) => {
-    const nextStatus = currentStatus === 'ACTIVE' ? 'DEACTIVATED' : 'ACTIVE';
+    const nextStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
     try {
       await apiFetch(`/api/admin/users/${userId}/status?status=${nextStatus}`, { method: 'POST' });
-      showToast('User status updated');
+      showToast(`User status changed to ${nextStatus}`);
       const users = await apiFetch('/api/admin/users');
       setAdminUsers(users);
     } catch (e) {}
   };
 
+  // File Upload Simulator
+  const simulateFileUpload = () => {
+    const sampleFiles = [
+      { name: 'Milestone1_Architecture_Schematics_V1.pdf', hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' },
+      { name: 'Multispectral_Drone_Flight_Telemetry_Log.json', hash: '8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4' },
+      { name: 'Landfill_Organic_Sorting_Accuracy_Test.csv', hash: 'a1293294c7b209a89c440a7a3748201b2c45187e1a3848123049182390142839' }
+    ];
+    const picked = sampleFiles[Math.floor(Math.random() * sampleFiles.length)];
+    setUploadedFile(picked);
+    showToast(`File "${picked.name}" encrypted locally (AES-256/SHA-256).`);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      {/* Toast Alert Banner */}
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans antialiased">
+      
+      {/* Toast Notification */}
       {toast && (
-        <div className={`fixed top-5 right-5 z-50 px-5 py-3 rounded-lg shadow-xl text-white transition-all flex items-center gap-2 ${
-          toast.type === 'success' ? 'bg-emerald-600' : 'bg-rose-600'
+        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-white border transition-all transform animate-bounce ${
+          toast.type === 'success' ? 'bg-emerald-700 border-emerald-600' : 'bg-red-700 border-red-600'
         }`}>
           {toast.type === 'success' ? <CheckCircle size={18} /> : <AlertTriangle size={18} />}
           <span className="font-medium text-sm">{toast.message}</span>
@@ -769,7 +861,7 @@ export default function App() {
                 
                 {/* Step 1 */}
                 <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 relative group hover:border-indigo-200 transition-colors">
-                  <div className="w-8 h-8 rounded-full bg-indigo-650 text-white flex items-center justify-center font-bold text-xs">1</div>
+                  <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">1</div>
                   <div className="space-y-1">
                     <h4 className="font-bold text-sm text-slate-800 flex items-center gap-1.5">
                       <Building2 size={16} className="text-indigo-600" /> Department Outcome Posting
@@ -780,7 +872,7 @@ export default function App() {
 
                 {/* Step 2 */}
                 <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 relative group hover:border-indigo-200 transition-colors">
-                  <div className="w-8 h-8 rounded-full bg-indigo-650 text-white flex items-center justify-center font-bold text-xs">2</div>
+                  <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">2</div>
                   <div className="space-y-1">
                     <h4 className="font-bold text-sm text-slate-800 flex items-center gap-1.5">
                       <Cpu size={16} className="text-indigo-600" /> Jaccard + AI Matching
@@ -791,7 +883,7 @@ export default function App() {
 
                 {/* Step 3 */}
                 <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 relative group hover:border-indigo-200 transition-colors">
-                  <div className="w-8 h-8 rounded-full bg-indigo-650 text-white flex items-center justify-center font-bold text-xs">3</div>
+                  <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">3</div>
                   <div className="space-y-1">
                     <h4 className="font-bold text-sm text-slate-800 flex items-center gap-1.5">
                       <GraduationCap size={16} className="text-indigo-600" /> Academic Scorecard Vetting
@@ -802,7 +894,7 @@ export default function App() {
 
                 {/* Step 4 */}
                 <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 relative group hover:border-indigo-200 transition-colors">
-                  <div className="w-8 h-8 rounded-full bg-indigo-650 text-white flex items-center justify-center font-bold text-xs">4</div>
+                  <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">4</div>
                   <div className="space-y-1">
                     <h4 className="font-bold text-sm text-slate-800 flex items-center gap-1.5">
                       <ShieldCheck size={16} className="text-indigo-600" /> Stamp NDA & Escrow Lock
@@ -813,7 +905,7 @@ export default function App() {
 
                 {/* Step 5 */}
                 <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 relative group hover:border-indigo-200 transition-colors">
-                  <div className="w-8 h-8 rounded-full bg-indigo-650 text-white flex items-center justify-center font-bold text-xs">5</div>
+                  <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">5</div>
                   <div className="space-y-1">
                     <h4 className="font-bold text-sm text-slate-800 flex items-center gap-1.5">
                       <Clock size={16} className="text-indigo-600" /> Milestone SLA payouts
@@ -824,7 +916,7 @@ export default function App() {
 
                 {/* Step 6 */}
                 <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 relative group hover:border-indigo-200 transition-colors">
-                  <div className="w-8 h-8 rounded-full bg-indigo-650 text-white flex items-center justify-center font-bold text-xs">6</div>
+                  <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">6</div>
                   <div className="space-y-1">
                     <h4 className="font-bold text-sm text-slate-800 flex items-center gap-1.5">
                       <BarChart3 size={16} className="text-indigo-600" /> Direct GeM Cataloging
@@ -952,327 +1044,164 @@ export default function App() {
                   <div>
                     <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Account Role</label>
                     <select value={registerForm.role} onChange={e => setRegisterForm({...registerForm, role: e.target.value as any})} className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm bg-white">
-                      <option value="STARTUP">Startup Profile</option>
-                      <option value="DEPARTMENT">Government Department</option>
-                      <option value="EXPERT">Evaluation Expert</option>
+                      <option value="STARTUP">Startup / Innovator</option>
+                      <option value="DEPARTMENT">Municipal Department Officer</option>
+                      <option value="EXPERT">Academic Expert (COEP/VJTI)</option>
                     </select>
                   </div>
                 </div>
 
-                {/* Polymorphic forms based on role selection */}
                 {registerForm.role === 'DEPARTMENT' && (
-                  <div className="space-y-4 border-t border-slate-100 pt-4">
-                    <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Department Details</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1">Department/Corporation Name</label>
-                        <input type="text" required value={registerForm.deptName} onChange={e => setRegisterForm({...registerForm, deptName: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm" placeholder="Pune Municipal Corporation" />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1">Nodal Contact Person</label>
-                        <input type="text" required value={registerForm.deptContactPerson} onChange={e => setRegisterForm({...registerForm, deptContactPerson: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm" placeholder="Dr. S. K. Deshpande" />
-                      </div>
-                    </div>
+                  <div className="space-y-4 border-t pt-4 border-slate-100">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-600">Department Profile</h4>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Office Address</label>
-                      <input type="text" value={registerForm.deptAddress} onChange={e => setRegisterForm({...registerForm, deptAddress: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm" placeholder="PMC Main Building, Shivajinagar, Pune" />
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Department Name</label>
+                      <input type="text" required value={registerForm.deptName} onChange={e => setRegisterForm({...registerForm, deptName: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm" placeholder="Smart Infrastructure Dept" />
                     </div>
                   </div>
                 )}
 
                 {registerForm.role === 'STARTUP' && (
-                  <div className="space-y-4 border-t border-slate-100 pt-4">
-                    <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Startup DPIIT Profile</h3>
+                  <div className="space-y-4 border-t pt-4 border-slate-100">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-600">Startup Verification Details</h4>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1">Company Registered Name</label>
-                        <input type="text" required value={registerForm.companyName} onChange={e => setRegisterForm({...registerForm, companyName: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm" placeholder="MahaTech Clean energy Pvt Ltd" />
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Company Name</label>
+                        <input type="text" required value={registerForm.companyName} onChange={e => setRegisterForm({...registerForm, companyName: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm" placeholder="Maha-EcoTech Solutions" />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1">DPIIT Registration Number</label>
-                        <input type="text" required value={registerForm.dpiitNumber} onChange={e => setRegisterForm({...registerForm, dpiitNumber: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm" placeholder="DPIIT-489031" />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1">Technology Domain</label>
-                        <input type="text" required value={registerForm.startupDomain} onChange={e => setRegisterForm({...registerForm, startupDomain: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm" placeholder="Waste Management" />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1">Team Size</label>
-                        <input type="number" value={registerForm.teamSize} onChange={e => setRegisterForm({...registerForm, teamSize: parseInt(e.target.value)})} className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm" />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1">Founded Year</label>
-                        <input type="number" value={registerForm.foundedYear} onChange={e => setRegisterForm({...registerForm, foundedYear: parseInt(e.target.value)})} className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm" />
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">DPIIT Reg. Number</label>
+                        <input type="text" required value={registerForm.dpiitNumber} onChange={e => setRegisterForm({...registerForm, dpiitNumber: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm" placeholder="DPIIT-893021" />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Capabilities Tags (comma-separated)</label>
-                      <input type="text" value={registerForm.startupTagsString} onChange={e => setRegisterForm({...registerForm, startupTagsString: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm" placeholder="Recycling, Biodegradation, Logistics" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Elevator Pitch Description</label>
-                      <textarea value={registerForm.startupDescription} onChange={e => setRegisterForm({...registerForm, startupDescription: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm" placeholder="Briefly describe your solution capabilities..." rows={3} />
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Capability Tags (Comma Separated)</label>
+                      <input type="text" value={registerForm.startupTagsString} onChange={e => setRegisterForm({...registerForm, startupTagsString: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm" placeholder="Waste Management, AI, Recycling, AgriTech" />
                     </div>
                   </div>
                 )}
 
                 {registerForm.role === 'EXPERT' && (
-                  <div className="space-y-4 border-t border-slate-100 pt-4">
-                    <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Expert Domain Credentials</h3>
+                  <div className="space-y-4 border-t pt-4 border-slate-100">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-600">Academic Affiliation Details</h4>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1">Expertise Primary Domain</label>
-                        <input type="text" required value={registerForm.expertDomain} onChange={e => setRegisterForm({...registerForm, expertDomain: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm" placeholder="AgriTech / FinTech" />
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Expertise Domain</label>
+                        <input type="text" required value={registerForm.expertDomain} onChange={e => setRegisterForm({...registerForm, expertDomain: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm" placeholder="Environmental Science & AI" />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-slate-600 mb-1">Designation & Institution</label>
-                        <input type="text" required value={registerForm.expertDesignation} onChange={e => setRegisterForm({...registerForm, expertDesignation: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm" placeholder="Professor, IIT Bombay" />
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Designation & Institution</label>
+                        <input type="text" required value={registerForm.expertDesignation} onChange={e => setRegisterForm({...registerForm, expertDesignation: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm" placeholder="Professor, COEP Tech University" />
                       </div>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1">Evaluation Skill Tags (comma-separated)</label>
-                      <input type="text" value={registerForm.expertTagsString} onChange={e => setRegisterForm({...registerForm, expertTagsString: e.target.value})} className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm" placeholder="IoT, AI, Water Management" />
                     </div>
                   </div>
                 )}
 
-                <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg text-sm shadow-md transition-colors cursor-pointer">Register Sandbox Account</button>
+                <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg text-sm shadow-md transition-colors cursor-pointer">
+                  Complete Registration
+                </button>
               </form>
-
-              <div className="mt-4 text-center">
-                <span className="text-xs text-slate-500">Already registered? </span>
-                <button onClick={() => setView('login')} className="text-xs font-bold text-indigo-600 hover:text-indigo-500 cursor-pointer">Log in here</button>
-              </div>
             </div>
           </div>
         )}
 
-        {/* DASHBOARD ROUTER BASED ON AUTH ROLE */}
+        {/* DASHBOARD ROUTER */}
         {view === 'dashboard' && auth && (
-          <div className="space-y-6">
+          <div className="space-y-8">
             
-            {/* DEPARTMENT ROLE VIEW */}
+            {/* DEPARTMENT DASHBOARD */}
             {auth.role === 'DEPARTMENT' && (
               <div className="space-y-6">
-                <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <div className="flex justify-between items-center bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                   <div>
-                    <h2 className="text-2xl font-black text-slate-800">Department Control Panel</h2>
-                    <p className="text-sm text-slate-500 mt-1">Manage problem challenges, evaluation results, and pilot sandboxes.</p>
+                    <h2 className="text-2xl font-black text-slate-900">Department Nodal Workspace</h2>
+                    <p className="text-xs text-slate-500 mt-1">Manage outcome challenges, run AI startup matching, and monitor active pilot escrows.</p>
                   </div>
                   <button 
-                    onClick={() => setView('post-problem')} 
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-1.5 shadow-md shadow-indigo-600/10 cursor-pointer transition-transform hover:-translate-y-0.5"
+                    onClick={() => { setCreateStep(1); setView('post-problem'); }}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2.5 rounded-xl shadow-md flex items-center gap-2 text-sm cursor-pointer transition-transform hover:-translate-y-0.5"
                   >
                     <Plus size={16} /> Post Outcome Challenge
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Problems Posted List */}
-                  <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                      <FileText size={18} className="text-indigo-600" /> Active Challenges ({problems.length})
-                    </h3>
-                    <div className="space-y-3 max-h-[450px] overflow-y-auto pr-2">
-                      {problems.length === 0 ? (
-                        <p className="text-xs text-slate-400 py-6 text-center">No challenges posted yet. Click 'Post Outcome Challenge' to start.</p>
-                      ) : (
-                        problems.map(problem => (
-                          <div 
-                            key={problem.id} 
-                            onClick={() => viewProblemDetails(problem)}
-                            className="p-4 rounded-xl border border-slate-100 hover:border-indigo-100 hover:bg-slate-50/50 cursor-pointer transition-all flex justify-between items-center group"
-                          >
-                            <div className="space-y-1">
-                              <h4 className="font-bold text-sm text-slate-800 group-hover:text-indigo-700 transition-colors">{problem.title}</h4>
-                              <div className="flex flex-wrap gap-1">
-                                {problem.tags.slice(0, 3).map((t, i) => (
-                                  <span key={i} className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">{t}</span>
-                                ))}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-[10px] font-bold px-2 py-1 rounded bg-indigo-50 text-indigo-700 uppercase">{problem.status}</span>
-                              <ChevronRight size={16} className="text-slate-400 group-hover:translate-x-0.5 transition-transform" />
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Active Pilots List */}
-                  <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                      <Briefcase size={18} className="text-indigo-600" /> Active Sandbox Pilots ({pilots.length})
-                    </h3>
-                    <div className="space-y-3 max-h-[450px] overflow-y-auto pr-2">
-                      {pilots.length === 0 ? (
-                        <p className="text-xs text-slate-400 py-6 text-center">No active pilots running. Shortlist a startup in challenge recommendations.</p>
-                      ) : (
-                        pilots.map(pilot => (
-                          <div 
-                            key={pilot.id} 
-                            onClick={() => viewPilotWorkspace(pilot)}
-                            className="p-4 rounded-xl border border-slate-100 hover:border-indigo-100 hover:bg-slate-50/50 cursor-pointer transition-all flex justify-between items-center group"
-                          >
-                            <div className="space-y-1.5 flex-grow">
-                              <h4 className="font-bold text-sm text-slate-800 group-hover:text-indigo-700 transition-colors">{pilot.problemTitle}</h4>
-                              <p className="text-xs text-slate-500">Startup: <span className="font-semibold">{pilot.startupName}</span></p>
-                              
-                              {/* Inline mini progress bar */}
-                              <div className="flex items-center gap-2 max-w-xs">
-                                <div className="w-24 bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                                  <div className="bg-indigo-600 h-full transition-all" style={{ width: `${pilot.currentProgress}%` }}></div>
-                                </div>
-                                <span className="text-[10px] font-bold text-slate-500">{pilot.currentProgress}% Progress</span>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-[10px] font-bold px-2 py-1 rounded bg-amber-50 text-amber-700 uppercase">{pilot.status}</span>
-                              <ChevronRight size={16} className="text-slate-400 group-hover:translate-x-0.5 transition-transform" />
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* STARTUP ROLE VIEW */}
-            {auth.role === 'STARTUP' && (
-              <div className="space-y-6">
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-2xl font-black text-slate-800">Startup Command Panel</h2>
-                      <span className="bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1 shadow-sm uppercase">
-                        <ShieldCheck size={12} /> DPIIT Verified
-                      </span>
-                    </div>
-                    <p className="text-sm text-slate-500 mt-1">Submit milestone updates, view matches, and track pilot evaluations.</p>
-                  </div>
-                  <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-100 text-right">
-                    <span className="text-[10px] text-slate-400 uppercase font-bold">Past Pilots count</span>
-                    <p className="text-lg font-black text-slate-800">1 Pilot</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Matching Problems Board */}
-                  <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                      <Cpu size={18} className="text-indigo-600" /> Matched Challenges ({problems.length})
-                    </h3>
-                    <div className="space-y-3">
-                      {problems.length === 0 ? (
-                        <p className="text-xs text-slate-400 py-6 text-center">No government challenges match your expertise domain tags.</p>
-                      ) : (
-                        problems.map(problem => (
-                          <div 
-                            key={problem.id}
-                            className="p-4 rounded-xl border border-slate-100 hover:border-indigo-100 hover:bg-slate-50/50 cursor-pointer transition-all flex justify-between items-center group"
-                            onClick={() => {
-                              showToast("Contact Pune Urban Development to participate in expert evaluation.");
-                            }}
-                          >
-                            <div>
-                              <h4 className="font-bold text-sm text-slate-800">{problem.title}</h4>
-                              <p className="text-xs text-slate-400 mt-0.5">By: {problem.departmentName}</p>
-                              <div className="flex flex-wrap gap-1 mt-2">
-                                {problem.tags.map((t, i) => (
-                                  <span key={i} className="text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">{t}</span>
-                                ))}
-                              </div>
-                            </div>
-                            <span className="text-[9px] font-bold bg-indigo-50 text-indigo-700 px-2 py-1 rounded uppercase tracking-wider">Eligible</span>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Active Pilots Workspace */}
-                  <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                      <Briefcase size={18} className="text-indigo-600" /> Active Pilots Workspace ({pilots.length})
-                    </h3>
-                    <div className="space-y-3">
-                      {pilots.length === 0 ? (
-                        <p className="text-xs text-slate-400 py-6 text-center">No active pilots running. Wait for department assignment.</p>
-                      ) : (
-                        pilots.map(pilot => (
-                          <div 
-                            key={pilot.id} 
-                            onClick={() => viewPilotWorkspace(pilot)}
-                            className="p-4 rounded-xl border border-slate-100 hover:border-indigo-100 hover:bg-slate-50/50 cursor-pointer transition-all flex justify-between items-center group"
-                          >
-                            <div className="space-y-1.5 flex-grow">
-                              <h4 className="font-bold text-sm text-slate-800 group-hover:text-indigo-700 transition-colors">{pilot.problemTitle}</h4>
-                              <p className="text-xs text-slate-500">Department: <span className="font-semibold">{pilot.departmentName}</span></p>
-                              
-                              <div className="flex items-center gap-2 max-w-xs">
-                                <div className="w-24 bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                                  <div className="bg-indigo-600 h-full transition-all" style={{ width: `${pilot.currentProgress}%` }}></div>
-                                </div>
-                                <span className="text-[10px] font-bold text-slate-500">{pilot.currentProgress}% Completed</span>
-                              </div>
-                            </div>
-                            <ChevronRight size={16} className="text-slate-400 group-hover:translate-x-0.5 transition-transform" />
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* EXPERT ROLE VIEW */}
-            {auth.role === 'EXPERT' && (
-              <div className="space-y-6">
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                  <h2 className="text-2xl font-black text-slate-800">Expert Evaluation Board</h2>
-                  <p className="text-sm text-slate-500 mt-1">Evaluate shortlisted startup proposals based on innovation, feasibility, capability, and cost.</p>
-                </div>
-
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                  <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <Clock size={18} className="text-indigo-600" /> Pending Evaluation Queue ({expertQueue.length})
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {expertQueue.length === 0 ? (
-                      <p className="text-xs text-slate-400 py-6 text-center col-span-2">No problems pending evaluation matching your expert tag domain.</p>
+                {/* Outcome Challenges Table */}
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+                  <h3 className="text-lg font-bold text-slate-800">Posted Outcome Challenges</h3>
+                  <div className="divide-y divide-slate-100">
+                    {problems.length === 0 ? (
+                      <p className="text-xs text-slate-400 py-4 italic">No challenges posted yet. Click 'Post Outcome Challenge' above to start.</p>
                     ) : (
-                      expertQueue.map(problem => (
-                        <div 
-                          key={problem.id}
-                          onClick={() => {
-                            setActiveProblem(problem);
-                            // Fetch recommendations to score the top startup
-                            apiFetch(`/api/problems/${problem.id}/recommendations`).then(recs => {
-                              setRecommendations(recs);
-                              setView('expert-evaluation-form');
-                            });
-                          }}
-                          className="p-5 rounded-xl border border-slate-100 hover:border-indigo-100 hover:bg-slate-50/50 cursor-pointer transition-all flex flex-col justify-between"
-                        >
-                          <div className="space-y-2">
-                            <h4 className="font-bold text-sm text-slate-800">{problem.title}</h4>
-                            <p className="text-xs text-slate-500 line-clamp-2">{problem.description}</p>
-                            <div className="flex flex-wrap gap-1">
-                              {problem.tags.map((t, i) => (
-                                <span key={i} className="text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">{t}</span>
-                              ))}
+                      problems.map(prob => (
+                        <div key={prob.id} className="py-4 flex items-center justify-between gap-4">
+                          <div className="space-y-1 max-w-xl">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-900 text-sm hover:text-indigo-600 cursor-pointer" onClick={() => viewProblemDetails(prob)}>
+                                {prob.title}
+                              </span>
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 uppercase border border-indigo-100">
+                                {prob.status}
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-500 line-clamp-1">{prob.description}</p>
+                            <div className="flex gap-2 text-[10px] text-slate-400">
+                              <span>Budget: ₹{prob.budgetMin?.toLocaleString()} - ₹{prob.budgetMax?.toLocaleString()}</span>
+                              <span>&bull;</span>
+                              <span>Timeline: {prob.timelineDays} Days</span>
                             </div>
                           </div>
-                          <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center">
-                            <span className="text-[10px] text-slate-400">Published: {new Date(problem.createdAt).toLocaleDateString()}</span>
-                            <span className="text-xs font-bold text-indigo-600 flex items-center gap-1">Evaluate Startup <ArrowRight size={12} /></span>
+                          <div className="flex items-center gap-2">
+                            <button 
+                              onClick={() => viewProblemDetails(prob)}
+                              className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                            >
+                              AI Discovery & Scorecard <ArrowRight size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Active Sandbox Pilots Overview */}
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+                  <h3 className="text-lg font-bold text-slate-800">Active Sandbox Pilot Workspaces</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {pilots.length === 0 ? (
+                      <p className="text-xs text-slate-400 py-4 italic col-span-2">No sandbox pilots launched yet.</p>
+                    ) : (
+                      pilots.map(plt => (
+                        <div key={plt.id} className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <span className="text-xs font-bold text-indigo-600 block">Pilot ID #{plt.id}</span>
+                              <h4 className="font-extrabold text-sm text-slate-900">{plt.problemTitle}</h4>
+                              <p className="text-[11px] text-slate-500">Partner: {plt.startupName}</p>
+                            </div>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200 uppercase">
+                              {plt.status}
+                            </span>
+                          </div>
+
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-[11px] font-semibold text-slate-600">
+                              <span>Overall Completion</span>
+                              <span>{plt.currentProgress}%</span>
+                            </div>
+                            <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                              <div className="bg-indigo-600 h-full transition-all" style={{ width: `${plt.currentProgress}%` }} />
+                            </div>
+                          </div>
+
+                          <div className="flex justify-between items-center text-[10px] text-slate-500 pt-1">
+                            <span>Escrow Locked: ₹{plt.escrowBalance?.toLocaleString()}</span>
+                            <button 
+                              onClick={() => viewPilotWorkspace(plt)}
+                              className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1 rounded-md text-xs cursor-pointer"
+                            >
+                              Open KPI Dashboard
+                            </button>
                           </div>
                         </div>
                       ))
@@ -1282,234 +1211,228 @@ export default function App() {
               </div>
             )}
 
-            {/* ADMIN ROLE VIEW */}
+            {/* STARTUP DASHBOARD */}
+            {auth.role === 'STARTUP' && (
+              <div className="space-y-6">
+                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                  <h2 className="text-2xl font-black text-slate-900">Startup Innovator Hub</h2>
+                  <p className="text-xs text-slate-500 mt-1">Review departmental outcome challenges, view AI recommendations, and upload milestone deliverables.</p>
+                </div>
+
+                {/* Active Pilot Workspaces */}
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+                  <h3 className="text-lg font-bold text-slate-800">Your Active Sandbox Workspaces</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {pilots.length === 0 ? (
+                      <p className="text-xs text-slate-400 py-4 italic col-span-2">No active sandbox pilots assigned yet.</p>
+                    ) : (
+                      pilots.map(plt => (
+                        <div key={plt.id} className="p-5 rounded-xl border border-indigo-100 bg-indigo-50/30 space-y-3">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <span className="text-xs font-bold text-indigo-600">Sandbox Pilot #{plt.id}</span>
+                              <h4 className="font-extrabold text-sm text-slate-900">{plt.problemTitle}</h4>
+                              <p className="text-[11px] text-slate-500">Dept: {plt.departmentName}</p>
+                            </div>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 uppercase border border-emerald-200">
+                              {plt.status}
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between text-[11px] text-slate-600 font-semibold">
+                            <span>Escrow Balance: ₹{plt.escrowBalance?.toLocaleString()}</span>
+                            <span>Progress: {plt.currentProgress}%</span>
+                          </div>
+
+                          <button 
+                            onClick={() => viewPilotWorkspace(plt)}
+                            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-lg text-xs cursor-pointer transition-colors shadow-sm"
+                          >
+                            Submit Progress & Deliverables
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Available Challenges Board */}
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+                  <h3 className="text-lg font-bold text-slate-800">Department Outcome Challenges</h3>
+                  <div className="divide-y divide-slate-100">
+                    {problems.map(prob => (
+                      <div key={prob.id} className="py-4 flex justify-between items-center gap-4">
+                        <div className="space-y-1">
+                          <h4 className="font-bold text-slate-900 text-sm">{prob.title}</h4>
+                          <p className="text-xs text-slate-500">{prob.description}</p>
+                          <div className="flex gap-2">
+                            {prob.tags.map((t, idx) => (
+                              <span key={idx} className="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-medium">{t}</span>
+                            ))}
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100 uppercase">
+                          Budget: ₹{prob.budgetMax?.toLocaleString()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* EXPERT DASHBOARD */}
+            {auth.role === 'EXPERT' && (
+              <div className="space-y-6">
+                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                  <h2 className="text-2xl font-black text-slate-900">Academic Expert Evaluation Panel</h2>
+                  <p className="text-xs text-slate-500 mt-1">Review assigned startup submissions, execute feasibility scorecards, and provide legal audit justifications.</p>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+                  <h3 className="text-lg font-bold text-slate-800">Assigned Challenges Pending Scorecard</h3>
+                  {expertQueue.length === 0 ? (
+                    <p className="text-xs text-slate-400 py-4 italic">No challenges currently assigned to your evaluation queue.</p>
+                  ) : (
+                    expertQueue.map(prob => (
+                      <div key={prob.id} className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex justify-between items-center gap-4">
+                        <div>
+                          <h4 className="font-bold text-slate-900 text-sm">{prob.title}</h4>
+                          <p className="text-xs text-slate-500 line-clamp-1">{prob.description}</p>
+                        </div>
+                        <button 
+                          onClick={() => viewProblemDetails(prob)}
+                          className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-lg text-xs cursor-pointer shrink-0"
+                        >
+                          Fill Evaluation Scorecard
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ADMIN DASHBOARD */}
             {auth.role === 'ADMIN' && (
               <div className="space-y-6">
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                  <h2 className="text-2xl font-black text-slate-800">Admin Platform Dashboard</h2>
-                  <p className="text-sm text-slate-500 mt-1">Platform monitoring, user approvals, and global KPI statistics.</p>
+                <div className="flex justify-between items-center bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                  <div>
+                    <h2 className="text-2xl font-black text-slate-900">Super Admin Audit & Oversight</h2>
+                    <p className="text-xs text-slate-500 mt-1">Monitor platform analytics, toggle user permissions, and verify the SHA-256 chained transaction audit ledger.</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => setAdminTab('overview')} 
+                      className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${adminTab === 'overview' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'}`}
+                    >
+                      System Overview
+                    </button>
+                    <button 
+                      onClick={() => setAdminTab('audit')} 
+                      className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer ${adminTab === 'audit' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'}`}
+                    >
+                      Tamper-Evident Audit Ledger
+                    </button>
+                  </div>
                 </div>
 
-                {/* Tab Navigation */}
-                <div className="flex border-b border-slate-200 gap-6 print:hidden">
-                  <button 
-                    onClick={() => setAdminTab('overview')}
-                    className={`pb-2.5 text-sm font-bold border-b-2 cursor-pointer transition-all ${
-                      adminTab === 'overview' 
-                        ? 'border-indigo-600 text-indigo-650' 
-                        : 'border-transparent text-slate-500 hover:text-slate-700'
-                    }`}
-                  >
-                    System Overview
-                  </button>
-                  <button 
-                    onClick={() => setAdminTab('audit')}
-                    className={`pb-2.5 text-sm font-bold border-b-2 cursor-pointer transition-all ${
-                      adminTab === 'audit' 
-                        ? 'border-indigo-600 text-indigo-650' 
-                        : 'border-transparent text-slate-500 hover:text-slate-700'
-                    }`}
-                  >
-                    Tamper-Evident Audit Ledger
-                  </button>
-                </div>
-
-                {adminTab === 'overview' ? (
-                  <>
-                    {/* Metrics Cards */}
-                    {adminAnalytics && (
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-                          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
-                            <FileText size={24} />
-                          </div>
-                          <div>
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">Total posted challenges</span>
-                            <p className="text-2xl font-black text-slate-800">{adminAnalytics.totalProblems} Problems</p>
-                          </div>
-                        </div>
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-                          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
-                            <Briefcase size={24} />
-                          </div>
-                          <div>
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">Active Pilots Running</span>
-                            <p className="text-2xl font-black text-slate-800">{adminAnalytics.totalPilots} Pilots</p>
-                          </div>
-                        </div>
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
-                          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
-                            <DollarSign size={24} />
-                          </div>
-                          <div>
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">Total Budget Escrow Locked</span>
-                            <p className="text-2xl font-black text-slate-800">₹{adminAnalytics.totalBudgetLocked.toLocaleString()}</p>
-                          </div>
-                        </div>
+                {adminTab === 'overview' && (
+                  <div className="space-y-6">
+                    {/* Analytics Grid */}
+                    <div className="grid grid-cols-3 gap-6">
+                      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center">
+                        <span className="text-3xl font-black text-indigo-600">{adminAnalytics?.totalProblems || 0}</span>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Total Outcome Challenges</p>
                       </div>
-                    )}
-
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                      {/* User Management Table */}
-                      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-2">
-                        <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                          <Users size={18} className="text-indigo-600" /> Platform User Management
-                        </h3>
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-left border-collapse text-xs">
-                            <thead>
-                              <tr className="border-b border-slate-100 text-slate-400 uppercase font-bold">
-                                <th className="py-3 px-2">Name</th>
-                                <th className="py-3 px-2">Email</th>
-                                <th className="py-3 px-2">Role</th>
-                                <th className="py-3 px-2">Status</th>
-                                <th className="py-3 px-2 text-right">Actions</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50 font-medium text-slate-700">
-                              {adminUsers.map(user => (
-                                <tr key={user.id} className="hover:bg-slate-50/50">
-                                  <td className="py-3 px-2 font-bold text-slate-800">{user.name}</td>
-                                  <td className="py-3 px-2 text-slate-500">{user.email}</td>
-                                  <td className="py-3 px-2">
-                                    <span className="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-100/50 font-semibold">{user.role}</span>
-                                  </td>
-                                  <td className="py-3 px-2">
-                                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                                      user.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
-                                    }`}>{user.status}</span>
-                                  </td>
-                                  <td className="py-3 px-2 text-right">
-                                    <button 
-                                      onClick={() => toggleUserStatus(user.id, user.status)}
-                                      className={`px-3 py-1 rounded text-[10px] font-bold border transition-colors cursor-pointer ${
-                                        user.status === 'ACTIVE' ? 'border-rose-200 text-rose-600 hover:bg-rose-50' : 'border-emerald-200 text-emerald-600 hover:bg-emerald-50'
-                                      }`}
-                                    >
-                                      {user.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
-                                    </button>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
+                      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center">
+                        <span className="text-3xl font-black text-indigo-600">{adminAnalytics?.totalPilots || 0}</span>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Active Sandbox Pilots</p>
                       </div>
-
-                      {/* Funnel Pipeline Visualizer */}
-                      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                        <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                          <BarChart3 size={18} className="text-indigo-600" /> Procurement Funnel
-                        </h3>
-                        {adminAnalytics && (
-                          <div className="space-y-4 pt-2">
-                            <div>
-                              <div className="flex justify-between text-xs font-bold text-slate-600 mb-1">
-                                <span>Problems Posted</span>
-                                <span>{adminAnalytics.totalProblems}</span>
-                              </div>
-                              <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                                <div className="bg-indigo-5050 h-full bg-indigo-600" style={{ width: '100%' }}></div>
-                              </div>
-                            </div>
-                            <div>
-                              <div className="flex justify-between text-xs font-bold text-slate-600 mb-1">
-                                <span>Evaluated Challenges</span>
-                                <span>{adminAnalytics.problemStatuses.UNDER_EVALUATION || 0}</span>
-                              </div>
-                              <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                                <div className="bg-sky-500 h-full" style={{ width: '70%' }}></div>
-                              </div>
-                            </div>
-                            <div>
-                              <div className="flex justify-between text-xs font-bold text-slate-600 mb-1">
-                                <span>Active Sandbox Pilots</span>
-                                <span>{adminAnalytics.totalPilots}</span>
-                              </div>
-                              <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                                <div className="bg-amber-500 h-full" style={{ width: '45%' }}></div>
-                              </div>
-                            </div>
-                            <div>
-                              <div className="flex justify-between text-xs font-bold text-slate-600 mb-1">
-                                <span>Scale-Up Decided</span>
-                                <span>{adminAnalytics.problemStatuses.DECIDED || 0}</span>
-                              </div>
-                              <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                                <div className="bg-emerald-500 h-full" style={{ width: '20%' }}></div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
+                      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center">
+                        <span className="text-3xl font-black text-emerald-600">₹{(adminAnalytics?.totalBudgetLocked || 0).toLocaleString()}</span>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Total Escrow Budget Locked</p>
                       </div>
                     </div>
-                  </>
-                ) : (
-                  <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-6">
-                    <div className="flex justify-between items-start">
+
+                    {/* User Management Table */}
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+                      <h3 className="text-lg font-bold text-slate-800">User Account Management</h3>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs text-left">
+                          <thead className="bg-slate-50 uppercase text-[10px] text-slate-400 font-bold">
+                            <tr>
+                              <th className="p-3">User</th>
+                              <th className="p-3">Role</th>
+                              <th className="p-3">Status</th>
+                              <th className="p-3 text-right">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                            {adminUsers.map(u => (
+                              <tr key={u.id}>
+                                <td className="p-3 font-bold text-slate-900">{u.name} <span className="text-[10px] text-slate-400 font-normal block">{u.email}</span></td>
+                                <td className="p-3"><span className="bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded text-[10px]">{u.role}</span></td>
+                                <td className="p-3"><span className={`font-bold px-2 py-0.5 rounded text-[10px] ${u.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>{u.status}</span></td>
+                                <td className="p-3 text-right">
+                                  <button 
+                                    onClick={() => toggleUserStatus(u.id, u.status)}
+                                    className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2.5 py-1 rounded text-[10px] cursor-pointer"
+                                  >
+                                    {u.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {adminTab === 'audit' && (
+                  <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-6">
+                    <div className="flex justify-between items-center">
                       <div>
-                        <h3 className="text-lg font-bold text-slate-800">Tamper-Evident Transaction Ledger</h3>
-                        <p className="text-xs text-slate-400">Secured with chained SHA-256 cryptographic hashes.</p>
+                        <h3 className="text-lg font-bold text-slate-900">Cryptographic Chained Audit Ledger</h3>
+                        <p className="text-xs text-slate-500 mt-0.5">Every event is hashed (SHA-256) and chained to the prior checksum to guarantee tamper-evident government auditing.</p>
                       </div>
                       <button 
-                        onClick={handleVerifyLedger}
-                        className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs cursor-pointer shadow transition-all flex items-center gap-1.5"
+                        onClick={verifyLedgerIntegrity}
+                        className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl shadow-md text-xs flex items-center gap-2 cursor-pointer transition-transform hover:-translate-y-0.5"
                       >
-                        Verify Ledger Integrity
+                        <ShieldCheck size={16} /> Verify Ledger Integrity
                       </button>
                     </div>
 
-                    {/* Ledger verification status indicator */}
                     {ledgerIntegrity && (
-                      <div className={`p-4 rounded-xl border flex items-center gap-3 ${
-                        ledgerIntegrity.verified 
-                          ? 'bg-emerald-50 text-emerald-800 border-emerald-100' 
-                          : 'bg-rose-50 text-rose-800 border-rose-100 animate-pulse'
-                      }`}>
-                        <ShieldCheck size={20} className={ledgerIntegrity.verified ? 'text-emerald-600' : 'text-rose-600'} />
-                        <div className="text-xs">
-                          <p className="font-extrabold">{ledgerIntegrity.verified ? 'Ledger Integrity Verified' : 'CRITICAL CORRUPTION DETECTED!'}</p>
-                          <p className="text-[10px] text-slate-500 mt-0.5">
-                            {ledgerIntegrity.verified 
-                              ? `All ${ledgerIntegrity.totalChecked} transaction blocks are cryptographically valid and chained correctly.` 
-                              : `Block ID ${ledgerIntegrity.corruptedLogId} failed the hash chain check. The ledger has been tampered with.`}
-                          </p>
+                      <div className={`p-4 rounded-xl border flex items-center gap-3 ${ledgerIntegrity.verified ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
+                        <ShieldCheck size={20} />
+                        <div className="text-xs font-bold">
+                          {ledgerIntegrity.verified ? `Ledger Integrity Verified! Clean cryptographic chain across ${ledgerIntegrity.totalChecked} records.` : `ALERT: Chain validation failed at Log ID #${ledgerIntegrity.corruptedLogId}! Tampered row detected.`}
                         </div>
                       </div>
                     )}
 
-                    {/* Logs List Table */}
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left border-collapse text-[11px]">
-                        <thead>
-                          <tr className="border-b border-slate-200 text-slate-400 uppercase font-bold text-[9px]">
-                            <th className="py-2.5 px-2">Block ID</th>
-                            <th className="py-2.5 px-2">Timestamp</th>
-                            <th className="py-2.5 px-2">Actor</th>
-                            <th className="py-2.5 px-2">Action</th>
-                            <th className="py-2.5 px-2">Details</th>
-                            <th className="py-2.5 px-2">SHA-256 Checksum (Chained)</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                          {auditLogs.map(log => (
-                            <tr key={log.id} className="hover:bg-slate-50/50">
-                              <td className="py-3 px-2 font-mono font-bold text-slate-500">Block #{log.id}</td>
-                              <td className="py-3 px-2 text-slate-400">{new Date(log.timestamp).toLocaleString()}</td>
-                              <td className="py-3 px-2 font-bold text-slate-800">{log.actor}</td>
-                              <td className="py-3 px-2">
-                                <span className="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-100 font-bold uppercase text-[9px]">
-                                  {log.action}
-                                </span>
-                              </td>
-                              <td className="py-3 px-2 text-slate-500 max-w-xs truncate" title={log.details}>{log.details}</td>
-                              <td className="py-3 px-2 font-mono text-[9px] text-indigo-600 select-all">
-                                {log.checksum.substring(0, 24)}...
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                    <div className="space-y-3">
+                      {auditLogs.map(log => (
+                        <div key={log.id} className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex justify-between items-start text-xs font-mono">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-indigo-600">[Log #{log.id}]</span>
+                              <span className="font-bold text-slate-800 uppercase">{log.action}</span>
+                              <span className="text-[10px] text-slate-400">{new Date(log.timestamp).toLocaleString()}</span>
+                            </div>
+                            <p className="text-slate-600 font-sans">{log.details}</p>
+                            <p className="text-[10px] text-slate-400 font-mono">Actor: {log.actor}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-[9px] font-mono text-slate-400 block">SHA-256 Hash:</span>
+                            <span className="text-[10px] font-mono text-indigo-700 font-bold block max-w-xs truncate">{log.checksum}</span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -1518,719 +1441,886 @@ export default function App() {
           </div>
         )}
 
-        {/* POST PROBLEM SCREEN */}
+        {/* FEATURE 1: 6-STEP CHALLENGE CREATION WIZARD */}
         {view === 'post-problem' && (
-          <div className="max-w-xl mx-auto py-8">
-            <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
-              <h2 className="text-3xl font-extrabold text-slate-900 mb-2">Post Outcome Challenge</h2>
-              <p className="text-sm text-slate-500 mb-6">Describe the operational bottleneck and outcome goals you require.</p>
-              
-              <form onSubmit={handleCreateProblem} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Challenge Title</label>
-                  <input 
-                    type="text" required value={newProblem.title} 
-                    onChange={e => setNewProblem({...newProblem, title: e.target.value})}
-                    placeholder="E.g., Automated IoT Organic waste segregator for municipal landfill"
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Objective Description</label>
-                  <textarea 
-                    required value={newProblem.description} 
-                    onChange={e => setNewProblem({...newProblem, description: e.target.value})}
-                    placeholder="Provide specific metrics: e.g., 'We require sorting accuracy of >90% for mixed municipal waste...'"
-                    rows={4}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Capabilities/Tags Required (comma-separated)</label>
-                  <input 
-                    type="text" required value={newProblem.tags} 
-                    onChange={e => setNewProblem({...newProblem, tags: e.target.value})}
-                    placeholder="Waste Management, Recycling, AI, IoT"
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm"
-                  />
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Min Budget (₹)</label>
-                    <input 
-                      type="number" value={newProblem.budgetMin} 
-                      onChange={e => setNewProblem({...newProblem, budgetMin: parseInt(e.target.value)})}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Max Budget (₹)</label>
-                    <input 
-                      type="number" value={newProblem.budgetMax} 
-                      onChange={e => setNewProblem({...newProblem, budgetMax: parseInt(e.target.value)})}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Timeline (days)</label>
-                    <input 
-                      type="number" value={newProblem.timelineDays} 
-                      onChange={e => setNewProblem({...newProblem, timelineDays: parseInt(e.target.value)})}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm"
-                    />
-                  </div>
-                </div>
-                <div className="flex gap-3 pt-4">
-                  <button type="submit" className="flex-grow bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg text-sm cursor-pointer shadow-md">Publish Challenge</button>
-                  <button type="button" onClick={() => setView('dashboard')} className="px-5 py-3 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 text-sm cursor-pointer">Cancel</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* CHALLENGE DETAIL VIEW (With Recommendations and Expert suggestions) */}
-        {view === 'problem-detail' && activeProblem && (
-          <div className="space-y-6 py-6">
-            <div className="flex items-center gap-2 text-sm text-slate-500 cursor-pointer" onClick={() => setView('dashboard')}>
-              <span>&larr; Back to Dashboard</span>
-            </div>
-
-            {/* Header info */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-start">
-              <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <h2 className="text-3xl font-black text-slate-800">{activeProblem.title}</h2>
-                  <span className="text-xs bg-indigo-50 text-indigo-700 border border-indigo-100 font-bold px-2 py-0.5 rounded uppercase">
-                    {activeProblem.status}
-                  </span>
-                </div>
-                <p className="text-slate-600 text-sm">{activeProblem.description}</p>
-                <div className="flex flex-wrap gap-2 pt-2">
-                  {activeProblem.tags.map((t, i) => (
-                    <span key={i} className="text-xs bg-slate-100 text-slate-600 border border-slate-200/50 px-2.5 py-1 rounded font-medium">{t}</span>
-                  ))}
-                </div>
+          <div className="max-w-4xl mx-auto space-y-6">
+            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-black text-slate-900">Post Outcome-Based Challenge</h2>
+                <p className="text-xs text-slate-500 mt-1">Multi-step wizard defining target outcomes, measurable KPIs, eligibility criteria, and sandbox milestones.</p>
               </div>
-              <div className="text-right whitespace-nowrap bg-slate-50 p-4 rounded-xl border border-slate-100 font-medium text-slate-800 text-sm space-y-1">
-                <p>Budget: ₹{activeProblem.budgetMin.toLocaleString()} - ₹{activeProblem.budgetMax.toLocaleString()}</p>
-                <p className="text-xs text-slate-500">Timeline: {activeProblem.timelineDays} days</p>
-              </div>
+              <button onClick={() => setView('dashboard')} className="text-xs font-bold text-slate-500 hover:text-slate-800">
+                Cancel & Return
+              </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              
-              {/* Recommendations Table */}
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-2 space-y-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <Rocket size={18} className="text-indigo-600" /> Ranked Recommended Startups
-                  </h3>
-                  <button 
-                    onClick={() => triggerMatching(activeProblem.id)}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs py-2 px-4 rounded-lg cursor-pointer transition-transform hover:-translate-y-0.5 shadow-sm"
-                  >
-                    Run Re-matching
-                  </button>
+            {/* 6-Step Progress Bar */}
+            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex justify-between text-xs font-bold text-slate-400 border-b">
+              {[
+                { num: 1, label: 'Basics' },
+                { num: 2, label: 'Outcome' },
+                { num: 3, label: 'KPIs' },
+                { num: 4, label: 'Eligibility' },
+                { num: 5, label: 'Pilot Config' },
+                { num: 6, label: 'Review & Publish' }
+              ].map(s => (
+                <div 
+                  key={s.num} 
+                  onClick={() => setCreateStep(s.num)}
+                  className={`flex items-center gap-1.5 cursor-pointer ${createStep === s.num ? 'text-indigo-600 font-black' : createStep > s.num ? 'text-emerald-600' : ''}`}
+                >
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${createStep === s.num ? 'bg-indigo-600 text-white' : createStep > s.num ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                    {s.num}
+                  </div>
+                  <span className="hidden sm:inline">{s.label}</span>
                 </div>
+              ))}
+            </div>
 
+            <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-xl space-y-6">
+              
+              {/* STEP 1: BASICS */}
+              {createStep === 1 && (
                 <div className="space-y-4">
-                  {recommendations.length === 0 ? (
-                    <p className="text-xs text-slate-400 py-8 text-center">No recommendations computed yet. Click "Run Re-matching".</p>
-                  ) : (
-                    recommendations.map(rec => (
-                      <div key={rec.id} className="p-5 rounded-xl border border-slate-100 hover:border-indigo-100 transition-colors space-y-3">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h4 className="font-bold text-sm text-slate-800">{rec.startup.companyName}</h4>
-                              <span className="text-[9px] bg-emerald-50 text-emerald-700 border border-emerald-100 px-1.5 py-0.5 rounded font-bold uppercase">
-                                Verified
-                              </span>
-                              {rec.startup.dpiitNumber && (
-                                <button 
-                                  onClick={() => handleVerifyDpiit(rec.startup.dpiitNumber)}
-                                  className="text-[10px] text-indigo-600 hover:text-indigo-800 font-bold underline cursor-pointer flex items-center gap-0.5"
-                                >
-                                  <ShieldCheck size={12} /> {rec.startup.dpiitNumber}
-                                </button>
-                              )}
-                            </div>
-                            <p className="text-xs text-slate-500 mt-1">{rec.startup.description}</p>
-                          </div>
-                          
-                          {/* Aggregate Score Ring/Gauges */}
-                          <div className="text-right">
-                            <span className="block text-2xl font-black text-indigo-600">{Math.round(rec.finalWeightedScore)}%</span>
-                            <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Matching score</span>
-                          </div>
-                        </div>
-
-                        {/* LLM semantic justification */}
-                        <div className="bg-indigo-50/50 p-3 rounded-lg border border-indigo-100/50 flex gap-2">
-                          <div className="text-indigo-600 pt-0.5 flex-shrink-0">
-                            <Cpu size={14} className="animate-pulse" />
-                          </div>
-                          <p className="text-xs text-indigo-900 leading-relaxed"><strong className="font-bold text-indigo-950">AI Assessment: </strong>{rec.llmJustification}</p>
-                        </div>
-
-                        {/* Details and Payout configuration trigger */}
-                        <div className="pt-2 border-t border-slate-50 flex justify-between items-center text-xs">
-                          <div className="flex gap-4 text-[10px] text-slate-500 font-bold">
-                            <span>Tags overlap: {Math.round(rec.ruleScore)}%</span>
-                            <span>LLM Semantics: {Math.round(rec.llmScore)}%</span>
-                          </div>
-                          <button 
-                            onClick={() => openPilotCreation(rec)}
-                            className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer transition-colors"
-                          >
-                            Launch Pilot Sandbox
-                          </button>
-                        </div>
-                      </div>
-                    ))
-                  )}
+                  <h3 className="text-lg font-bold text-slate-800 border-b pb-2">Step 1: Challenge Basics & Problem Scope</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Challenge Title</label>
+                      <input type="text" value={wizardForm.title} onChange={e => setWizardForm({...wizardForm, title: e.target.value})} className="w-full px-4 py-2 border rounded-lg text-sm" placeholder="AI Landfill Waste Sorter" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Government Department</label>
+                      <input type="text" value={wizardForm.department} onChange={e => setWizardForm({...wizardForm, department: e.target.value})} className="w-full px-4 py-2 border rounded-lg text-sm" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Category / Sector</label>
+                      <select value={wizardForm.category} onChange={e => setWizardForm({...wizardForm, category: e.target.value})} className="w-full px-4 py-2 border rounded-lg text-sm bg-white">
+                        <option value="Waste Management & CleanTech">Waste Management & CleanTech</option>
+                        <option value="Smart Infrastructure">Smart Infrastructure</option>
+                        <option value="HealthTech & Telemedicine">HealthTech & Telemedicine</option>
+                        <option value="AgriTech & Drone Services">AgriTech & Drone Services</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nodal Officer / Contact</label>
+                      <input type="text" value={wizardForm.contactPerson} onChange={e => setWizardForm({...wizardForm, contactPerson: e.target.value})} className="w-full px-4 py-2 border rounded-lg text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Location / District</label>
+                      <input type="text" value={wizardForm.location} onChange={e => setWizardForm({...wizardForm, location: e.target.value})} className="w-full px-4 py-2 border rounded-lg text-sm" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Detailed Challenge Description</label>
+                    <textarea rows={3} value={wizardForm.description} onChange={e => setWizardForm({...wizardForm, description: e.target.value})} className="w-full px-4 py-2 border rounded-lg text-sm" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Current Problem / Bottleneck</label>
+                      <textarea rows={2} value={wizardForm.currentProblem} onChange={e => setWizardForm({...wizardForm, currentProblem: e.target.value})} className="w-full px-4 py-2 border rounded-lg text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Existing Process & Target Beneficiaries</label>
+                      <textarea rows={2} value={wizardForm.targetBeneficiaries} onChange={e => setWizardForm({...wizardForm, targetBeneficiaries: e.target.value})} className="w-full px-4 py-2 border rounded-lg text-sm" />
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* Sidebar: Jaccard Expert Recommendations & evaluations */}
-              <div className="space-y-6">
-                
-                {/* Expert Suggestions */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                  <h3 className="text-md font-bold text-slate-800 flex items-center gap-2">
-                    <GraduationCap size={18} className="text-indigo-600" /> Recommended Evaluators
-                  </h3>
+              {/* STEP 2: DESIRED OUTCOME */}
+              {createStep === 2 && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold text-slate-800 border-b pb-2">Step 2: Desired Measurable Outcome</h3>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Desired Outcome Statement</label>
+                    <textarea rows={3} value={wizardForm.desiredOutcome} onChange={e => setWizardForm({...wizardForm, desiredOutcome: e.target.value})} className="w-full px-4 py-2 border rounded-lg text-sm" placeholder="Define the end goal rather than specifying technical hardware details..." />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Baseline / Current Performance</label>
+                      <input type="text" value={wizardForm.baselinePerformance} onChange={e => setWizardForm({...wizardForm, baselinePerformance: e.target.value})} className="w-full px-4 py-2 border rounded-lg text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Target Performance Goal</label>
+                      <input type="text" value={wizardForm.targetPerformance} onChange={e => setWizardForm({...wizardForm, targetPerformance: e.target.value})} className="w-full px-4 py-2 border rounded-lg text-sm" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Expected Community Impact</label>
+                      <textarea rows={2} value={wizardForm.expectedImpact} onChange={e => setWizardForm({...wizardForm, expectedImpact: e.target.value})} className="w-full px-4 py-2 border rounded-lg text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Geographic Deployment Scope</label>
+                      <input type="text" value={wizardForm.geographicScope} onChange={e => setWizardForm({...wizardForm, geographicScope: e.target.value})} className="w-full px-4 py-2 border rounded-lg text-sm" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 3: SUCCESS CRITERIA / KPIS */}
+              {createStep === 3 && (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center border-b pb-2">
+                    <h3 className="text-lg font-bold text-slate-800">Step 3: Measurable Success Criteria & KPIs</h3>
+                    <button 
+                      type="button" 
+                      onClick={() => setKpiList([...kpiList, { name: 'New KPI', description: '', baseline: '0', target: '100', unit: '%', method: 'Sensor Logs', frequency: 'Weekly', weight: 20 }])}
+                      className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-3 py-1.5 rounded-lg text-xs flex items-center gap-1 cursor-pointer"
+                    >
+                      <Plus size={14} /> Add KPI Row
+                    </button>
+                  </div>
+
                   <div className="space-y-3">
-                    {suggestedExperts.slice(0, 3).map((match, i) => (
-                      <div key={i} className="p-3 rounded-xl border border-slate-50 bg-slate-50/50 flex justify-between items-center">
-                        <div className="space-y-0.5">
-                          <h4 className="font-bold text-xs text-slate-800">{match.expert.user.name}</h4>
-                          <span className="text-[10px] text-slate-400 block">{match.expert.designation}</span>
-                        </div>
-                        <div className="text-right">
+                    {kpiList.map((kpi, idx) => (
+                      <div key={idx} className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-indigo-600">KPI #{idx + 1}</span>
                           <button 
-                            onClick={() => assignExpert(match.expert.user.name)}
-                            className="text-[10px] bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-indigo-600 font-bold px-2 py-1 rounded transition-all cursor-pointer"
+                            type="button" 
+                            onClick={() => setKpiList(kpiList.filter((_, i) => i !== idx))}
+                            className="text-red-500 hover:text-red-700 text-xs font-bold cursor-pointer"
                           >
-                            Assign
+                            Remove
                           </button>
-                          <span className="block text-[8px] text-slate-400 mt-1 font-bold">Jaccard Match: {Math.round(match.matchingScore * 100)}%</span>
+                        </div>
+                        <div className="grid grid-cols-4 gap-3">
+                          <div>
+                            <label className="block text-[10px] font-bold uppercase text-slate-500">KPI Name</label>
+                            <input type="text" value={kpi.name} onChange={e => { const updated = [...kpiList]; updated[idx].name = e.target.value; setKpiList(updated); }} className="w-full px-2.5 py-1 border rounded text-xs" />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold uppercase text-slate-500">Baseline</label>
+                            <input type="text" value={kpi.baseline} onChange={e => { const updated = [...kpiList]; updated[idx].baseline = e.target.value; setKpiList(updated); }} className="w-full px-2.5 py-1 border rounded text-xs" />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold uppercase text-slate-500">Target</label>
+                            <input type="text" value={kpi.target} onChange={e => { const updated = [...kpiList]; updated[idx].target = e.target.value; setKpiList(updated); }} className="w-full px-2.5 py-1 border rounded text-xs" />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold uppercase text-slate-500">Weight (%)</label>
+                            <input type="number" value={kpi.weight} onChange={e => { const updated = [...kpiList]; updated[idx].weight = Number(e.target.value); setKpiList(updated); }} className="w-full px-2.5 py-1 border rounded text-xs" />
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
+              )}
 
-                {/* Evaluation Results */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                  <h3 className="text-md font-bold text-slate-800 flex items-center gap-2">
-                    <UserCheck size={18} className="text-indigo-600" /> Expert Ratings
-                  </h3>
-                  <div className="space-y-3">
-                    {problemEvaluations.length === 0 ? (
-                      <p className="text-xs text-slate-400 py-6 text-center">No ratings submitted yet.</p>
-                    ) : (
-                      problemEvaluations.map(evalu => (
-                        <div key={evalu.id} className="p-3.5 rounded-xl border border-slate-100 space-y-2">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h4 className="font-bold text-xs text-slate-800">{evalu.expertName}</h4>
-                              <p className="text-[9px] text-slate-400 mt-0.5">Assessed: {evalu.startupName}</p>
-                            </div>
-                            <span className="text-xs font-black text-indigo-600">{evalu.avgScore}/5.0</span>
-                          </div>
-                          <p className="text-xs text-slate-500 italic bg-slate-50 p-2 rounded">"{evalu.comments}"</p>
-                        </div>
-                      ))
-                    )}
+              {/* STEP 4: ELIGIBILITY & EVALUATION */}
+              {createStep === 4 && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold text-slate-800 border-b pb-2">Step 4: Startup Eligibility & Expert Evaluation Rubric</h3>
+                  <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <input type="checkbox" id="dpiitReq" checked={wizardForm.dpiitRequired} onChange={e => setWizardForm({...wizardForm, dpiitRequired: e.target.checked})} className="w-4 h-4 text-indigo-600 rounded" />
+                    <label htmlFor="dpiitReq" className="text-xs font-bold text-slate-800 cursor-pointer">Require Active DPIIT Startup Recognition (Startup India Registry)</label>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Required Technical Capabilities</label>
+                      <textarea rows={3} value={wizardForm.techRequirements} onChange={e => setWizardForm({...wizardForm, techRequirements: e.target.value})} className="w-full px-4 py-2 border rounded-lg text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Minimum Eligibility Criteria</label>
+                      <textarea rows={3} value={wizardForm.minCriteria} onChange={e => setWizardForm({...wizardForm, minCriteria: e.target.value})} className="w-full px-4 py-2 border rounded-lg text-sm" />
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-600">Default Academic Expert Evaluation Rubric Weights</h4>
+                    <div className="grid grid-cols-5 gap-2 text-center text-xs font-bold text-slate-700">
+                      <div className="bg-white p-2 border rounded">Feasibility: 30%</div>
+                      <div className="bg-white p-2 border rounded">Innovation: 20%</div>
+                      <div className="bg-white p-2 border rounded">Scalability: 20%</div>
+                      <div className="bg-white p-2 border rounded">Impact: 20%</div>
+                      <div className="bg-white p-2 border rounded">Risk: 10%</div>
+                    </div>
                   </div>
                 </div>
+              )}
 
+              {/* STEP 5: PILOT CONFIGURATION */}
+              {createStep === 5 && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold text-slate-800 border-b pb-2">Step 5: Pilot Sandbox Structure & Budget</h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Pilot Duration (Days)</label>
+                      <input type="number" value={wizardForm.timelineDays} onChange={e => setWizardForm({...wizardForm, timelineDays: Number(e.target.value)})} className="w-full px-4 py-2 border rounded-lg text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Min Budget (₹)</label>
+                      <input type="number" value={wizardForm.budgetMin} onChange={e => setWizardForm({...wizardForm, budgetMin: Number(e.target.value)})} className="w-full px-4 py-2 border rounded-lg text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Max Escrow Budget (₹)</label>
+                      <input type="number" value={wizardForm.budgetMax} onChange={e => setWizardForm({...wizardForm, budgetMax: Number(e.target.value)})} className="w-full px-4 py-2 border rounded-lg text-sm" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 pt-2">
+                    <h4 className="text-xs font-bold text-slate-700 uppercase">Default Pilot Milestones & Escrow Payment Schedule</h4>
+                    <div className="space-y-2">
+                      {milestoneList.map((m, idx) => (
+                        <div key={idx} className="p-3 bg-slate-50 rounded-lg border border-slate-200 flex justify-between items-center text-xs">
+                          <div>
+                            <span className="font-bold text-slate-800">{m.name}</span>
+                            <p className="text-[10px] text-slate-500">{m.criteria}</p>
+                          </div>
+                          <span className="font-black text-indigo-600 bg-white px-2.5 py-1 rounded border">{m.paymentPercentage}% Tranche</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 6: REVIEW & PUBLISH */}
+              {createStep === 6 && (
+                <div className="space-y-6">
+                  <h3 className="text-lg font-bold text-slate-800 border-b pb-2">Step 6: Challenge Summary Review & Publish</h3>
+                  
+                  <div className="p-6 rounded-2xl border border-indigo-100 bg-indigo-50/30 space-y-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className="text-xs font-bold text-indigo-600 uppercase">{wizardForm.category} &bull; {wizardForm.location}</span>
+                        <h2 className="text-xl font-black text-slate-900">{wizardForm.title}</h2>
+                        <p className="text-xs text-slate-500 mt-1">Nodal Contact: {wizardForm.contactPerson}</p>
+                      </div>
+                      <span className="text-xs font-black bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full border border-emerald-200">
+                        Max Escrow: ₹{wizardForm.budgetMax.toLocaleString()}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 text-xs">
+                      <div className="bg-white p-3 rounded-lg border">
+                        <span className="font-bold text-slate-700 block">Desired Outcome:</span>
+                        <p className="text-slate-600 mt-0.5">{wizardForm.desiredOutcome}</p>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg border">
+                        <span className="font-bold text-slate-700 block">Baseline vs Target Performance:</span>
+                        <p className="text-slate-600 mt-0.5">Baseline: {wizardForm.baselinePerformance} &rarr; Target: {wizardForm.targetPerformance}</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="font-bold text-slate-800 text-xs block mb-1.5">Configured KPIs ({kpiList.length}):</span>
+                      <div className="grid grid-cols-3 gap-2">
+                        {kpiList.map((k, i) => (
+                          <div key={i} className="bg-white p-2.5 rounded-lg border text-[11px]">
+                            <span className="font-bold text-indigo-600 block">{k.name}</span>
+                            <span className="text-slate-500">Target: {k.target} ({k.unit})</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Wizard Navigation Footer Buttons */}
+              <div className="flex justify-between items-center pt-4 border-t border-slate-100">
+                {createStep > 1 ? (
+                  <button 
+                    type="button" 
+                    onClick={() => setCreateStep(createStep - 1)}
+                    className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-5 py-2 rounded-xl text-xs cursor-pointer"
+                  >
+                    Back
+                  </button>
+                ) : <div />}
+
+                {createStep < 6 ? (
+                  <button 
+                    type="button" 
+                    onClick={() => setCreateStep(createStep + 1)}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-2.5 rounded-xl text-xs flex items-center gap-1 cursor-pointer"
+                  >
+                    Next Step <ChevronRight size={16} />
+                  </button>
+                ) : (
+                  <div className="flex gap-3">
+                    <button 
+                      type="button"
+                      onClick={() => { showToast('Draft saved locally.'); setView('dashboard'); }}
+                      className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-5 py-2.5 rounded-xl text-xs cursor-pointer"
+                    >
+                      Save Draft
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={handlePublishChallenge}
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-2.5 rounded-xl text-xs shadow-lg shadow-emerald-600/20 flex items-center gap-2 cursor-pointer"
+                    >
+                      <CheckCircle size={16} /> Publish Challenge
+                    </button>
+                  </div>
+                )}
               </div>
-
             </div>
           </div>
         )}
 
-        {/* EXPERT EVALUATION FORM */}
-        {view === 'expert-evaluation-form' && activeProblem && (
-          <div className="max-w-xl mx-auto py-8">
-            <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
-              <div className="flex items-center gap-2 text-sm text-slate-500 cursor-pointer mb-4" onClick={() => setView('dashboard')}>
-                <span>&larr; Back to Queue</span>
+        {/* FEATURE 2: EXPLAINABLE AI MATCH & SCORECARD */}
+        {view === 'matching' && activeProblem && (
+          <div className="space-y-6">
+            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-center">
+              <div>
+                <span className="text-xs font-bold text-indigo-600 uppercase">AI Startup Discovery & Evaluation Engine</span>
+                <h2 className="text-2xl font-black text-slate-900">{activeProblem.title}</h2>
               </div>
-              <h2 className="text-3xl font-extrabold text-slate-900 mb-1">Evaluate Startup</h2>
-              <span className="text-xs text-indigo-600 font-semibold uppercase tracking-wider block mb-6">Challenge: {activeProblem.title}</span>
+              <button onClick={() => setView('dashboard')} className="text-xs font-bold text-slate-500 hover:text-slate-800">
+                Return to Dashboard
+              </button>
+            </div>
 
-              {recommendations.length > 0 ? (
-                <form onSubmit={handleSubmitEvaluation} className="space-y-5">
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Candidate Startup</span>
-                    <h4 className="font-bold text-sm text-slate-800 mt-1">{recommendations[0].startup.companyName}</h4>
-                    <p className="text-xs text-slate-500 mt-0.5">{recommendations[0].startup.description}</p>
+            {/* SECTION A: ACTIVE MATCHING PROCESSING SEQUENCE */}
+            <div className="bg-slate-900 text-white p-6 rounded-2xl border border-slate-800 space-y-4">
+              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+                <span className="text-xs font-mono text-indigo-400 font-bold">AI Discovery Sequence (Jaccard + Gemini 1.5 Flash)</span>
+                <button onClick={() => triggerMatching(activeProblem.id)} className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1 rounded text-xs cursor-pointer">Re-Run Engine</button>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-6 gap-2 text-[10px] font-mono">
+                {[
+                  { step: 1, label: 'Challenge Analyzed' },
+                  { step: 2, label: 'Requirements Extracted' },
+                  { step: 3, label: 'Startups Filtered' },
+                  { step: 4, label: 'Capabilities Compared' },
+                  { step: 5, label: 'Gemini AI Scored' },
+                  { step: 6, label: 'Scorecard Generated' }
+                ].map(s => (
+                  <div key={s.step} className={`p-2 rounded border text-center transition-all ${activeMatchingStep >= s.step ? 'bg-indigo-900/60 border-indigo-500 text-indigo-200' : 'bg-slate-800 border-slate-700 text-slate-500'}`}>
+                    <span>{activeMatchingStep >= s.step ? '✓' : '○'} {s.label}</span>
                   </div>
+                ))}
+              </div>
+            </div>
 
-                  {/* 1-5 Sliders for criteria */}
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex justify-between text-xs font-bold text-slate-700 mb-1">
-                        <span>Technical Feasibility</span>
-                        <span className="text-indigo-600 font-extrabold">{evalScores.feasibility} / 5</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              
+              {/* SECTION B: STARTUP MATCH RESULTS CARDS */}
+              <div className="space-y-4">
+                <h3 className="text-md font-bold text-slate-800">Discovered Startups ({recommendations.length})</h3>
+                {recommendations.map(rec => (
+                  <div 
+                    key={rec.id} 
+                    onClick={() => setSelectedMatchStartup(rec)}
+                    className={`p-4 rounded-2xl border cursor-pointer transition-all space-y-3 ${selectedMatchStartup?.id === rec.id ? 'bg-indigo-50/60 border-indigo-500 shadow-md' : 'bg-white border-slate-100 hover:border-slate-200'}`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-extrabold text-sm text-slate-900">{rec.startup.companyName}</h4>
+                        <span className="text-[10px] text-slate-400 block">{rec.startup.domain || 'Tech Innovator'}</span>
                       </div>
-                      <input 
-                        type="range" min="1" max="5" value={evalScores.feasibility} 
-                        onChange={e => setEvalScores({...evalScores, feasibility: parseInt(e.target.value)})}
-                        className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                      />
+                      <span className="text-xs font-black bg-indigo-600 text-white px-2.5 py-1 rounded-full">
+                        {Math.round(rec.finalWeightedScore)}% Match
+                      </span>
                     </div>
-                    <div>
-                      <div className="flex justify-between text-xs font-bold text-slate-700 mb-1">
-                        <span>Novelty & Innovation</span>
-                        <span className="text-indigo-600 font-extrabold">{evalScores.innovation} / 5</span>
-                      </div>
-                      <input 
-                        type="range" min="1" max="5" value={evalScores.innovation} 
-                        onChange={e => setEvalScores({...evalScores, innovation: parseInt(e.target.value)})}
-                        className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                      />
+
+                    <div className="flex items-center gap-2 text-[10px]">
+                      {rec.startup.isDpiitVerified ? (
+                        <span 
+                          onClick={(e) => { e.stopPropagation(); checkDpiitRegistry(rec.startup.dpiitNumber); }}
+                          className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold cursor-pointer hover:bg-emerald-200"
+                        >
+                          ✓ DPIIT Verified ({rec.startup.dpiitNumber})
+                        </span>
+                      ) : (
+                        <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Unverified</span>
+                      )}
+                      <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-semibold">Low Risk</span>
                     </div>
-                    <div>
-                      <div className="flex justify-between text-xs font-bold text-slate-700 mb-1">
-                        <span>Team Implementation Capability</span>
-                        <span className="text-indigo-600 font-extrabold">{evalScores.team} / 5</span>
-                      </div>
-                      <input 
-                        type="range" min="1" max="5" value={evalScores.team} 
-                        onChange={e => setEvalScores({...evalScores, team: parseInt(e.target.value)})}
-                        className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                      />
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-xs font-bold text-slate-700 mb-1">
-                        <span>Cost & Economic Viability</span>
-                        <span className="text-indigo-600 font-extrabold">{evalScores.cost} / 5</span>
-                      </div>
-                      <input 
-                        type="range" min="1" max="5" value={evalScores.cost} 
-                        onChange={e => setEvalScores({...evalScores, cost: parseInt(e.target.value)})}
-                        className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                      />
+
+                    <div className="flex gap-1.5 flex-wrap text-[10px]">
+                      {rec.startup.tags.map((t, idx) => (
+                        <span key={idx} className="bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-medium">{t}</span>
+                      ))}
                     </div>
                   </div>
+                ))}
+              </div>
 
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Expert Remarks</label>
-                    <textarea 
-                      required value={evalScores.comments} 
-                      onChange={e => setEvalScores({...evalScores, comments: e.target.value})}
-                      placeholder="Provide specific feedback on the technology and implementation plan..."
-                      rows={3}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm"
-                    />
+              {/* SECTION C & D: EXPLAINABLE SCORE & ELIGIBILITY SCREENING */}
+              {selectedMatchStartup && (
+                <div className="md:col-span-2 space-y-6">
+                  <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-6">
+                    <div className="flex justify-between items-center border-b pb-3">
+                      <div>
+                        <span className="text-xs font-bold text-indigo-600 uppercase">Selected Startup Evaluation</span>
+                        <h3 className="text-xl font-black text-slate-900">{selectedMatchStartup.startup.companyName}</h3>
+                      </div>
+                      <button 
+                        onClick={() => openContractStage(selectedMatchStartup)}
+                        className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md flex items-center gap-1.5 cursor-pointer"
+                      >
+                        Generate Contract Agreement <ArrowRight size={14} />
+                      </button>
+                    </div>
+
+                    {/* SECTION C: EXPLAINABLE MATCH SCORE BREAKDOWN */}
+                    <div className="space-y-3">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">Dimensional Match Score Breakdown</h4>
+                      <div className="grid grid-cols-5 gap-3 text-center">
+                        <div className="bg-slate-50 p-3 rounded-xl border">
+                          <span className="text-lg font-black text-indigo-600">{Math.round(selectedMatchStartup.finalWeightedScore)}%</span>
+                          <span className="text-[9px] font-bold text-slate-500 block">Challenge Alignment</span>
+                        </div>
+                        <div className="bg-slate-50 p-3 rounded-xl border">
+                          <span className="text-lg font-black text-indigo-600">{Math.round(selectedMatchStartup.ruleScore * 100)}%</span>
+                          <span className="text-[9px] font-bold text-slate-500 block">Jaccard Tag Match</span>
+                        </div>
+                        <div className="bg-slate-50 p-3 rounded-xl border">
+                          <span className="text-lg font-black text-indigo-600">{Math.round(selectedMatchStartup.llmScore * 20)}%</span>
+                          <span className="text-[9px] font-bold text-slate-500 block">AI Gemini Rating</span>
+                        </div>
+                        <div className="bg-slate-50 p-3 rounded-xl border">
+                          <span className="text-lg font-black text-emerald-600">88%</span>
+                          <span className="text-[9px] font-bold text-slate-500 block">Pilot Readiness</span>
+                        </div>
+                        <div className="bg-slate-50 p-3 rounded-xl border">
+                          <span className="text-lg font-black text-emerald-600">95%</span>
+                          <span className="text-[9px] font-bold text-slate-500 block">Scalability Score</span>
+                        </div>
+                      </div>
+
+                      <div className="bg-indigo-50/50 p-3.5 rounded-xl border border-indigo-100 text-xs text-slate-700 italic">
+                        <span className="font-bold text-indigo-900 not-italic block mb-0.5">Gemini 1.5 Flash Justification:</span>
+                        "{selectedMatchStartup.llmJustification}"
+                      </div>
+                    </div>
+
+                    {/* SECTION D: ELIGIBILITY SCREENING CHECKLIST */}
+                    <div className="space-y-3">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">Eligibility & Compliance Checklist</h4>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="flex items-center gap-2 p-2 bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-100 font-medium">
+                          <CheckCircle size={14} /> DPIIT Registered Startup ({selectedMatchStartup.startup.dpiitNumber})
+                        </div>
+                        <div className="flex items-center gap-2 p-2 bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-100 font-medium">
+                          <CheckCircle size={14} /> Startup Active Status Verified
+                        </div>
+                        <div className="flex items-center gap-2 p-2 bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-100 font-medium">
+                          <CheckCircle size={14} /> Tech Capabilities Matched
+                        </div>
+                        <div className="flex items-center gap-2 p-2 bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-100 font-medium">
+                          <CheckCircle size={14} /> Sector Alignment Confirmed
+                        </div>
+                        <div className="flex items-center gap-2 p-2 bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-100 font-medium">
+                          <CheckCircle size={14} /> No Disqualifying Conditions
+                        </div>
+                        <div className="flex items-center gap-2 p-2 bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-100 font-medium">
+                          <CheckCircle size={14} /> GFR Exemption Eligible
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* SECTION E: ACADEMIC EXPERT SCORECARD FORM */}
+                    {auth?.role === 'EXPERT' && (
+                      <div className="space-y-4 pt-4 border-t border-slate-100">
+                        <h4 className="text-sm font-extrabold text-slate-900">Academic Expert Quantitative Scorecard</h4>
+                        <form onSubmit={e => handleSubmitEvaluation(e, activeProblem.id, selectedMatchStartup.startup.id)} className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700">Technical Feasibility (30% Weight): {evalScores.feasibility}/5</label>
+                              <input type="range" min="1" max="5" value={evalScores.feasibility} onChange={e => setEvalScores({...evalScores, feasibility: Number(e.target.value)})} className="w-full" />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700">Innovation Score (20% Weight): {evalScores.innovation}/5</label>
+                              <input type="range" min="1" max="5" value={evalScores.innovation} onChange={e => setEvalScores({...evalScores, innovation: Number(e.target.value)})} className="w-full" />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700">Scalability Score (20% Weight): {evalScores.team}/5</label>
+                              <input type="range" min="1" max="5" value={evalScores.team} onChange={e => setEvalScores({...evalScores, team: Number(e.target.value)})} className="w-full" />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-slate-700">Cost Rationality (20% Weight): {evalScores.cost}/5</label>
+                              <input type="range" min="1" max="5" value={evalScores.cost} onChange={e => setEvalScores({...evalScores, cost: Number(e.target.value)})} className="w-full" />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Academic Evaluator Audit Comments</label>
+                            <textarea rows={2} value={evalScores.comments} onChange={e => setEvalScores({...evalScores, comments: e.target.value})} className="w-full p-2.5 border rounded-lg text-xs" placeholder="Add technical rationale for state auditors..." />
+                          </div>
+                          <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-2 rounded-xl text-xs shadow-md cursor-pointer">
+                            Submit Scorecard
+                          </button>
+                        </form>
+                      </div>
+                    )}
+
+                    <p className="text-[10px] text-slate-400 italic text-center pt-2">
+                      * AI-assisted recommendation — final evaluation remains with authorized evaluators.
+                    </p>
                   </div>
-
-                  <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg text-sm cursor-pointer shadow-md">Submit Scorecard</button>
-                </form>
-              ) : (
-                <p className="text-xs text-slate-400 py-6 text-center">Error: Recommended startups list empty.</p>
+                </div>
               )}
             </div>
           </div>
         )}
 
-        {/* PILOT WORKSPACE SCREEN */}
-        {view === 'pilot-workspace' && activePilot && (
-          <div className="space-y-6 py-6">
-            <div className="flex items-center gap-2 text-sm text-slate-500 cursor-pointer" onClick={() => setView('dashboard')}>
-              <span>&larr; Back to Dashboard</span>
+        {/* FEATURE 3: CONTRACT GENERATION & E-SIGNING STAGE */}
+        {view === 'contract' && selectedContractRec && activeProblem && (
+          <div className="max-w-4xl mx-auto space-y-6">
+            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-center">
+              <div>
+                <span className="text-xs font-bold text-indigo-600 uppercase">Contract Stage: Pre-Sandbox Legal Agreement</span>
+                <h2 className="text-2xl font-black text-slate-900">{activeProblem.title}</h2>
+                <p className="text-xs text-slate-500">Partner: {selectedContractRec.startup.companyName}</p>
+              </div>
+              <button onClick={() => setView('dashboard')} className="text-xs font-bold text-slate-500 hover:text-slate-800">
+                Cancel
+              </button>
             </div>
 
-            {/* Header / Sandbox status */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-3">
-                  <h2 className="text-3xl font-black text-slate-800">Pilot Sandbox Workspace</h2>
-                  <span className="text-xs bg-amber-50 text-amber-700 border border-amber-100 font-bold px-2.5 py-0.5 rounded uppercase">
-                    {activePilot.status}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-500">
-                  Challenge: <span className="font-semibold text-slate-700">{activePilot.problemTitle}</span> | 
-                  Department: <span className="font-semibold text-slate-700">{activePilot.departmentName}</span> | 
-                  Startup: <span className="font-semibold text-slate-700">{activePilot.startupName}</span>
+            {/* Document Tabs */}
+            <div className="flex gap-2 border-b border-slate-200 pb-2 text-xs font-bold">
+              {[
+                { id: 'pilot-agreement', label: 'Pilot Implementation Agreement' },
+                { id: 'nda', label: 'Mutual NDA' },
+                { id: 'privacy', label: 'Data & Privacy Terms' },
+                { id: 'ip', label: 'IP Ownership & Usage' },
+                { id: 'cybersecurity', label: 'Cybersecurity Clauses' }
+              ].map(t => (
+                <button 
+                  key={t.id}
+                  onClick={() => setContractTab(t.id as any)}
+                  className={`px-3 py-2 rounded-lg cursor-pointer transition-colors ${contractTab === t.id ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Contract Document Canvas */}
+            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xl space-y-6 relative overflow-hidden">
+              
+              <div className="bg-amber-50 border border-amber-200 p-2.5 rounded-lg text-amber-800 text-[11px] font-bold text-center">
+                Prototype template — subject to legal review.
+              </div>
+
+              {/* Document Header */}
+              <div className="text-center space-y-1 border-b pb-4">
+                <h3 className="text-xl font-extrabold uppercase text-slate-900">
+                  {contractTab === 'pilot-agreement' ? 'SANDBOX PILOT IMPLEMENTATION AGREEMENT' :
+                   contractTab === 'nda' ? 'MUTUAL NON-DISCLOSURE AGREEMENT (NDA)' :
+                   contractTab === 'privacy' ? 'DATA GOVERNANCE & CITIZEN PRIVACY TERMS' :
+                   contractTab === 'ip' ? 'INTELLECTUAL PROPERTY & USAGE RIGHTS' : 'CYBERSECURITY & RISK MANAGEMENT CLAUSES'}
+                </h3>
+                <p className="text-xs text-slate-500">Executed under State Innovative Procurement Policy Rules</p>
+              </div>
+
+              {/* Document Body */}
+              <div className="space-y-4 text-xs text-slate-700 leading-relaxed font-serif">
+                <p>
+                  This Agreement is entered into on this <strong>{new Date().toLocaleDateString()}</strong> by and between 
+                  <strong> The Department of {activeProblem.departmentName}</strong> ("Disbursing Authority") AND 
+                  <strong> {selectedContractRec.startup.companyName}</strong> ("Sandbox Partner", DPIIT: {selectedContractRec.startup.dpiitNumber}).
                 </p>
-                <p className="text-xs text-slate-400 italic">Scope: "{activePilot.scope}"</p>
+
+                {contractTab === 'pilot-agreement' && (
+                  <div className="space-y-3 font-sans">
+                    <h4 className="font-bold text-slate-900 text-sm">1. OBJECTIVE & OUTCOME SCOPE</h4>
+                    <p>The Sandbox Partner shall deploy a pilot sandbox for: <strong>"{activeProblem.desiredOutcome || activeProblem.description}"</strong>.</p>
+                    <h4 className="font-bold text-slate-900 text-sm">2. BUDGET & ESCROW ALLOCATION</h4>
+                    <p>Allocated Escrow Budget: <strong>₹{(activeProblem.budgetMax || 1500000).toLocaleString()}</strong>. Escrow payouts are unlocked automatically upon independent validation of quantifiable KPI milestones.</p>
+                  </div>
+                )}
+
+                {contractTab === 'nda' && (
+                  <div className="space-y-3 font-sans">
+                    <h4 className="font-bold text-slate-900 text-sm">CONFIDENTIAL INFORMATION & DATA PROTECTION</h4>
+                    <p>Both parties agree that all operational telemetry, citizen inputs, and proprietary algorithms disclosed during the sandbox duration shall remain strictly confidential.</p>
+                  </div>
+                )}
+
+                {contractTab === 'ip' && (
+                  <div className="space-y-3 font-sans">
+                    <h4 className="font-bold text-slate-900 text-sm">BACKGROUND & FOREGROUND IP CLAUSES</h4>
+                    <p>Background IP owned prior to the pilot remains 100% the property of the startup. Data collected during sandbox deployment belongs exclusively to the state department.</p>
+                  </div>
+                )}
               </div>
 
-              {/* Escrow lock box visual indicator */}
-              <div className="bg-slate-900 text-slate-100 p-5 rounded-2xl border border-slate-800 shadow-xl flex items-center gap-6">
-                <div className="p-3 bg-indigo-600 rounded-xl text-white">
-                  <ShieldCheck size={28} />
+              {/* Dual E-Signature Section */}
+              <div className="grid grid-cols-2 gap-6 pt-6 border-t font-sans">
+                <div className="p-4 rounded-xl border bg-slate-50 text-center space-y-3">
+                  <span className="text-xs font-bold text-slate-700 block">Department Representative Signature</span>
+                  {contractSignedDept ? (
+                    <div className="text-emerald-600 font-bold text-xs flex items-center justify-center gap-1">
+                      <CheckCircle size={16} /> Digitally Signed (Nodal Officer)
+                    </div>
+                  ) : (
+                    <button 
+                      onClick={() => handleSignContract('dept')}
+                      className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-lg text-xs cursor-pointer"
+                    >
+                      Sign as Department
+                    </button>
+                  )}
                 </div>
-                <div className="space-y-1">
-                  <span className="text-[10px] text-indigo-400 uppercase font-extrabold tracking-wider block">Escrow Tracker</span>
-                  <div className="flex gap-4 text-xs">
+
+                <div className="p-4 rounded-xl border bg-slate-50 text-center space-y-3">
+                  <span className="text-xs font-bold text-slate-700 block">Startup Authorized Officer Signature</span>
+                  {contractSignedStartup ? (
+                    <div className="text-emerald-600 font-bold text-xs flex items-center justify-center gap-1">
+                      <CheckCircle size={16} /> Digitally Signed (Startup CEO)
+                    </div>
+                  ) : (
+                    <button 
+                      onClick={() => handleSignContract('startup')}
+                      className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-lg text-xs cursor-pointer"
+                    >
+                      Sign as Startup
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Activation Trigger */}
+              <div className="pt-4 text-center">
+                <button 
+                  disabled={!contractSignedDept || !contractSignedStartup}
+                  onClick={submitLaunchPilotFromContract}
+                  className={`px-8 py-3.5 rounded-xl font-bold text-xs shadow-xl flex items-center justify-center gap-2 mx-auto cursor-pointer ${
+                    contractSignedDept && contractSignedStartup ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                  }`}
+                >
+                  <Lock size={16} /> Lock Escrow Budget & Activate Sandbox Pilot
+                </button>
+                {(!contractSignedDept || !contractSignedStartup) && (
+                  <p className="text-[10px] text-slate-400 mt-1">Both Department and Startup signatures are required to unlock escrow allocation.</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* FEATURE 4: ACTIVE PILOT KPI TRACKER & INDEPENDENT VALIDATION */}
+        {view === 'pilot-workspace' && activePilot && (
+          <div className="space-y-6">
+            
+            {/* Pilot Header Banner */}
+            <div className="bg-slate-900 text-white p-6 rounded-2xl border border-slate-800 space-y-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <span className="text-xs font-mono text-indigo-400 font-bold">Active Pilot ID #{activePilot.id}</span>
+                  <h2 className="text-2xl font-black">{activePilot.problemTitle}</h2>
+                  <p className="text-xs text-slate-400">Partner: {activePilot.startupName} &bull; Dept: {activePilot.departmentName}</p>
+                </div>
+                <span className="text-xs font-bold px-3 py-1 rounded bg-emerald-900 text-emerald-200 border border-emerald-700 uppercase">
+                  {activePilot.status}
+                </span>
+              </div>
+
+              {/* Real-time Escrow & Completion Tracker */}
+              <div className="grid grid-cols-4 gap-4 text-xs font-mono pt-2 border-t border-slate-800">
+                <div>
+                  <span className="text-slate-400 block">Total Budget:</span>
+                  <span className="font-bold text-white text-sm">₹{activePilot.budget.toLocaleString()}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block">Locked in Escrow:</span>
+                  <span className="font-bold text-emerald-400 text-sm">₹{activePilot.escrowBalance?.toLocaleString()}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block">Disbursed Tranches:</span>
+                  <span className="font-bold text-indigo-400 text-sm">₹{activePilot.releasedAmount?.toLocaleString()}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block">Overall Progress:</span>
+                  <span className="font-bold text-sky-400 text-sm">{activePilot.currentProgress}%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* KPI Performance Dashboard Table */}
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-bold text-slate-900">Real-Time KPI Performance Tracker</h3>
+                <span className="text-xs text-indigo-600 font-bold">4 KPIs Configured</span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-slate-50 uppercase text-[10px] text-slate-400 font-bold">
+                    <tr>
+                      <th className="p-3">KPI Name</th>
+                      <th className="p-3">Baseline</th>
+                      <th className="p-3">Target Goal</th>
+                      <th className="p-3">Current Value</th>
+                      <th className="p-3">Progress %</th>
+                      <th className="p-3">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {[
+                      { name: 'Segregation Accuracy', baseline: '35%', target: '90%', current: '94%', progress: 104, status: 'ACHIEVED' },
+                      { name: 'Processing Time / Ton', baseline: '120 min', target: '25 min', current: '24 min', progress: 104, status: 'ACHIEVED' },
+                      { name: 'Landfill Diverted Volume', baseline: '10%', target: '60%', current: '52%', progress: 86, status: 'IN_PROGRESS' },
+                      { name: 'Operating Cost / Ton', baseline: '₹1200', target: '₹850', current: '₹890', progress: 73, status: 'IN_PROGRESS' }
+                    ].map((kpi, idx) => (
+                      <tr key={idx}>
+                        <td className="p-3 font-bold text-slate-900">{kpi.name}</td>
+                        <td className="p-3 text-slate-500">{kpi.baseline}</td>
+                        <td className="p-3 font-bold text-slate-800">{kpi.target}</td>
+                        <td className="p-3 font-bold text-indigo-600">{kpi.current}</td>
+                        <td className="p-3 font-bold">{kpi.progress}%</td>
+                        <td className="p-3">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${kpi.status === 'ACHIEVED' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                            {kpi.status === 'ACHIEVED' ? '✓ Target Achieved' : '⚠ In Progress'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Milestone Engine & Escrow Payment Schedule */}
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+              <h3 className="text-lg font-bold text-slate-900">Milestone Engine & Payment Schedule</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                  { num: 1, name: 'Milestone 1: Equipment Setup', pct: 25, amt: activePilot.budget * 0.25, status: 'APPROVED', text: 'Completed & Released' },
+                  { num: 2, name: 'Milestone 2: Initial Sorting Runs', pct: 35, amt: activePilot.budget * 0.35, status: activePilot.currentProgress >= 60 ? 'APPROVED' : 'PENDING', text: activePilot.currentProgress >= 60 ? 'Validated & Released' : 'In Progress' },
+                  { num: 3, name: 'Milestone 3: Full Capacity Validation', pct: 40, amt: activePilot.budget * 0.40, status: activePilot.currentProgress >= 100 ? 'APPROVED' : 'PENDING', text: activePilot.currentProgress >= 100 ? 'Validated & Released' : 'Pending Completion' }
+                ].map(m => (
+                  <div key={m.num} className="p-4 rounded-xl border bg-slate-50 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-bold text-indigo-600">Milestone #{m.num}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${m.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}`}>{m.text}</span>
+                    </div>
+                    <h4 className="font-bold text-xs text-slate-800">{m.name}</h4>
+                    <div className="flex justify-between items-center text-[11px] pt-1">
+                      <span className="text-slate-500">Tranche: {m.pct}%</span>
+                      <span className="font-bold text-slate-900">₹{m.amt.toLocaleString()}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Startup Progress Submission Form */}
+            {auth?.role === 'STARTUP' && (
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+                <h3 className="text-lg font-bold text-slate-900">Submit Milestone Deliverables & KPI Measurements</h3>
+                <form onSubmit={handleSubmitProgress} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <span className="text-slate-400 text-[9px] block">Locked Escrow</span>
-                      <p className="font-extrabold text-amber-400 text-sm">₹{(activePilot.escrowBalance != null ? activePilot.escrowBalance : activePilot.budget).toLocaleString()}</p>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Progress Percentage (%)</label>
+                      <input type="number" min="0" max="100" value={progressPercent} onChange={e => setProgressPercent(Number(e.target.value))} className="w-full p-2 border rounded-lg text-xs" />
                     </div>
-                    <div className="border-l border-slate-800 pl-4">
-                      <span className="text-slate-400 text-[9px] block">Disbursed</span>
-                      <p className="font-extrabold text-emerald-400 text-sm">₹{(activePilot.releasedAmount || 0).toLocaleString()}</p>
-                    </div>
-                    <div className="border-l border-slate-800 pl-4">
-                      <span className="text-slate-400 text-[9px] block">Total Budget</span>
-                      <p className="font-extrabold text-slate-200 text-sm">₹{activePilot.budget.toLocaleString()}</p>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Milestone Deliverable Name</label>
+                      <input type="text" value={milestoneName} onChange={e => setMilestoneName(e.target.value)} className="w-full p-2 border rounded-lg text-xs" placeholder="e.g. Milestone 2: Sorting Calibration" />
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Tab Navigation */}
-            <div className="flex border-b border-slate-200 gap-6 print:hidden">
-              <button 
-                onClick={() => setPilotTab('milestones')}
-                className={`pb-2.5 text-sm font-bold border-b-2 cursor-pointer transition-all ${
-                  pilotTab === 'milestones' 
-                    ? 'border-indigo-600 text-indigo-650' 
-                    : 'border-transparent text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                Milestones & Progress
-              </button>
-              <button 
-                onClick={() => setPilotTab('legal')}
-                className={`pb-2.5 text-sm font-bold border-b-2 cursor-pointer transition-all ${
-                  pilotTab === 'legal' 
-                    ? 'border-indigo-600 text-indigo-650' 
-                    : 'border-transparent text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                Legal Agreements
-              </button>
-            </div>
-
-            {pilotTab === 'milestones' ? (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 print:hidden">
-                
-                {/* Progress & Milestone updates logging */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:col-span-2 space-y-6">
                   <div>
-                    <h3 className="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
-                      <TrendingUp size={18} className="text-indigo-600" /> Milestone Tracking
-                    </h3>
-                    <p className="text-xs text-slate-400">Chronological history of startup progress updates.</p>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Technical Deliverable Notes</label>
+                    <textarea rows={2} value={updateNotes} onChange={e => setUpdateNotes(e.target.value)} className="w-full p-2 border rounded-lg text-xs" placeholder="Detail trial runs, sensor data, and site achievements..." />
                   </div>
-
-                  {/* Progress bar visual */}
-                  <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-2">
-                    <div className="flex justify-between text-xs font-bold text-slate-700">
-                      <span>Pilot Sandbox progress completion</span>
-                      <span className="text-indigo-600 font-extrabold">{activePilot.currentProgress}%</span>
-                    </div>
-                    <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
-                      <div className="bg-indigo-600 h-full transition-all duration-500" style={{ width: `${activePilot.currentProgress}%` }}></div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    {pilotUpdates.length === 0 ? (
-                      <p className="text-xs text-slate-400 py-6 text-center">No progress updates submitted yet.</p>
-                    ) : (
-                      pilotUpdates.map(update => (
-                        <div key={update.id} className="p-4 rounded-xl border border-slate-100 bg-white space-y-3 relative shadow-sm">
-                          <div className="flex justify-between items-start">
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2">
-                                <span className="inline-block text-[10px] bg-slate-100 text-slate-650 px-2 py-0.5 rounded font-bold uppercase">
-                                  {update.milestoneName || 'Milestone Update'}
-                                </span>
-                                {update.status === 'APPROVED' ? (
-                                  <span className="inline-flex items-center gap-1 text-[9px] bg-emerald-50 text-emerald-700 border border-emerald-100 font-bold px-1.5 py-0.5 rounded uppercase">
-                                    <CheckCircle size={10} /> Disbursed
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex items-center gap-1 text-[9px] bg-amber-50 text-amber-700 border border-amber-100 font-bold px-1.5 py-0.5 rounded uppercase">
-                                    <Clock size={10} /> Escrow Locked (Pending)
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-xs text-slate-600 mt-1.5">{update.notes}</p>
-                              {update.attachmentName && (
-                                <div className="mt-2 p-2 bg-indigo-50/50 text-indigo-900 border border-indigo-150 rounded-lg flex items-center justify-between text-[9px] max-w-lg">
-                                  <span className="font-semibold flex items-center gap-1"><ShieldCheck size={12} className="text-indigo-600" /> {update.attachmentName}</span>
-                                  <span className="font-mono text-[8px] text-slate-400">SHA-256: {update.attachmentHash ? update.attachmentHash.substring(0, 16) : ''}...</span>
-                                </div>
-                              )}
-                            </div>
-                            <div className="text-right">
-                              <span className="block text-xs font-black text-indigo-650">{update.progressPercent}% progress</span>
-                              <span className="text-[8px] text-slate-400 block mt-0.5">{new Date(update.submittedAt).toLocaleDateString()}</span>
-                            </div>
-                          </div>
-
-                          {/* Actions for PENDING milestones */}
-                          {update.status === 'PENDING' && (
-                            <div className="flex items-center justify-between border-t border-slate-100 pt-2.5 mt-1.5">
-                              <div className="flex items-center gap-1.5 text-[10px] text-slate-400 italic">
-                                <Clock size={12} /> SLA Timer: 7 Days Remaining before auto-approval
-                              </div>
-                              <div className="flex gap-2">
-                                <button 
-                                  onClick={() => handleSlaTrigger(update.id)}
-                                  className="bg-slate-100 hover:bg-amber-100 hover:text-amber-800 text-slate-600 font-bold px-2.5 py-1 rounded text-[10px] cursor-pointer transition-colors"
-                                >
-                                  Simulate SLA Expiry
-                                </button>
-                                {auth?.role === 'DEPARTMENT' && (
-                                  <button 
-                                    onClick={() => handleApproveMilestone(update.id)}
-                                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1 rounded text-[10px] cursor-pointer transition-colors shadow-sm"
-                                  >
-                                    Approve & Release Funds
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      ))
+                  <div className="flex items-center gap-4">
+                    <button type="button" onClick={simulateFileUpload} className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-4 py-2 rounded-lg text-xs flex items-center gap-1.5 cursor-pointer">
+                      <FileCode size={14} /> Encrypt & Upload Proof PDF
+                    </button>
+                    {uploadedFile && (
+                      <span className="text-xs font-bold text-emerald-600">✓ Encrypted: {uploadedFile.name}</span>
                     )}
                   </div>
-                </div>
-
-                {/* Sidebar Action forms based on role (Startup submits progress, Dept decides) */}
-                <div className="space-y-6">
-                  
-                  {/* STARTUP UPDATE FORM */}
-                  {auth?.role === 'STARTUP' && activePilot.status === 'PILOT_ACTIVE' && (
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                      <h3 className="text-md font-bold text-slate-800">Submit Progress Update</h3>
-                      <form onSubmit={handleSubmitProgress} className="space-y-4">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Milestone Name</label>
-                          <input 
-                            type="text" required value={milestoneName} 
-                            onChange={e => setMilestoneName(e.target.value)}
-                            placeholder="E.g., Hardware Assembly Complete"
-                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Incremental Progress (%)</label>
-                          <input 
-                            type="number" min="0" max="100" required value={progressPercent} 
-                            onChange={e => setProgressPercent(parseInt(e.target.value))}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Notes / Description</label>
-                          <textarea 
-                            required value={updateNotes} 
-                            onChange={e => setUpdateNotes(e.target.value)}
-                            placeholder="Brief explanation of work done, testing outputs, or blockers..."
-                            rows={3}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 uppercase mb-1">IP Protected Document Attachment</label>
-                          {uploadedFile ? (
-                            <div className="p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg flex flex-col gap-1 text-[10px]">
-                              <div className="flex items-center justify-between">
-                                <span className="font-bold flex items-center gap-1"><ShieldCheck size={14} className="text-emerald-600" /> {uploadedFile.name}</span>
-                                <button type="button" onClick={() => setUploadedFile(null)} className="text-slate-400 hover:text-slate-600 font-bold text-xs">&times;</button>
-                              </div>
-                              <span className="text-[8px] font-mono text-emerald-700 break-all select-all">SHA-256 Hash: {uploadedFile.hash}</span>
-                            </div>
-                          ) : (
-                            <button 
-                              type="button"
-                              onClick={simulateFileUpload}
-                              className="w-full border border-dashed border-indigo-200 hover:bg-indigo-50/50 p-4 rounded-lg flex flex-col items-center justify-center gap-1 text-[10px] text-indigo-650 cursor-pointer transition-all"
-                            >
-                              <FileText size={18} className="text-indigo-400" />
-                              <span className="font-bold">Encrypt & Upload Milestone Proof (PDF/Zip)</span>
-                              <span className="text-[8px] text-slate-400">Files are secured with AES-256 client-side hashing</span>
-                            </button>
-                          )}
-                        </div>
-                        <button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-lg text-xs cursor-pointer shadow">Submit Update</button>
-                      </form>
-                    </div>
-                  )}
-
-                  {/* DEPARTMENT DECISION FORM */}
-                  {auth?.role === 'DEPARTMENT' && (
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                      <h3 className="text-md font-bold text-slate-800">Final Procurement Decision</h3>
-                      <form onSubmit={handleSubmitDecision} className="space-y-4">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Decision Type</label>
-                          <select 
-                            value={decisionType} 
-                            onChange={e => setDecisionType(e.target.value)}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs bg-white"
-                          >
-                            <option value="SCALE">Scale pilot deployment</option>
-                            <option value="PROCURE">Compliant Procurement (PAC/GeM)</option>
-                            <option value="REJECT">Reject / Terminate pilot</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Remarks & Justification</label>
-                          <textarea 
-                            required value={decisionRemarks} 
-                            onChange={e => setDecisionRemarks(e.target.value)}
-                            placeholder="Provide legal/technical justification for scaling or procurement pathway..."
-                            rows={4}
-                            className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs"
-                          />
-                        </div>
-                        {(decisionType === 'SCALE' || decisionType === 'PROCURE') && (
-                          <div className="flex items-center gap-2 py-1">
-                            <input 
-                              type="checkbox" 
-                              id="publishGem" 
-                              checked={publishToGem} 
-                              onChange={e => setPublishToGem(e.target.checked)}
-                              className="w-4 h-4 text-indigo-650 border-slate-200 rounded cursor-pointer"
-                            />
-                            <label htmlFor="publishGem" className="text-xs font-semibold text-slate-700 cursor-pointer">
-                              Publish Certified Pilot Catalog to GeM Portal
-                            </label>
-                          </div>
-                        )}
-                        <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-lg text-xs cursor-pointer shadow-md">Submit Decision</button>
-                      </form>
-                    </div>
-                  )}
-
-                </div>
-
-              </div>
-            ) : (
-              <div className="bg-white p-8 rounded-2xl shadow-xl border border-slate-200 max-w-4xl mx-auto space-y-8 print:shadow-none print:border-none print:p-0">
-                {/* Print Control Header */}
-                <div className="flex justify-between items-center border-b border-slate-100 pb-4 print:hidden">
-                  <div>
-                    <h3 className="text-lg font-black text-slate-800">Dynamic Legal Contract Generator</h3>
-                    <p className="text-xs text-slate-500">Auto-filled based on active sandbox parameters.</p>
-                  </div>
-                  <button 
-                    onClick={() => window.print()}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-lg text-xs cursor-pointer shadow flex items-center gap-1.5 transition-colors"
-                  >
-                    <FileText size={14} /> Print / Save as PDF
+                  <button type="submit" className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-2.5 rounded-xl text-xs cursor-pointer shadow-md">
+                    Submit Milestone Update for Independent Validation
                   </button>
-                </div>
-
-                {/* Stamp Paper Design */}
-                <div className="border-[3px] border-double border-orange-800 p-6 space-y-8 bg-amber-50/10 min-h-[800px] relative">
-                  {/* Top Stamp Header */}
-                  <div className="border-2 border-orange-800 p-4 text-center space-y-2 relative bg-orange-50/20">
-                    {/* Stamp Emblem Seal */}
-                    <div className="absolute top-2 left-6 border border-orange-800 w-16 h-16 rounded-full flex items-center justify-center text-[10px] font-bold text-orange-950 uppercase select-none">
-                      Gov of MH
-                    </div>
-                    <div className="absolute top-2 right-6 border border-orange-800 w-16 h-16 flex items-center justify-center text-[18px] font-black text-orange-950 select-none">
-                      ₹ 500
-                    </div>
-                    
-                    <h4 className="text-xl font-bold text-orange-950 tracking-wider">गैर न्यायिक / NON-JUDICIAL</h4>
-                    <h2 className="text-2xl font-black text-orange-950 tracking-widest leading-none">भारत सरकार / GOVERNMENT OF INDIA</h2>
-                    <h3 className="text-lg font-bold text-orange-900 leading-none">राज्य शासन / STATE GOVERNMENT</h3>
-                    <div className="text-[10px] font-mono text-orange-800/80 mt-1">MH-500AA90412 &bull; SECURE TRANSACTION SANDBOX IDENTIFIER</div>
-                  </div>
-
-                  {/* Stamp Paper watermark overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] select-none">
-                    <Building2 size={300} className="text-slate-900" />
-                  </div>
-
-                  {/* Contract Content */}
-                  <div className="space-y-6 text-slate-800 text-xs leading-relaxed max-w-3xl mx-auto font-serif">
-                    <div className="text-center space-y-1">
-                      <h3 className="text-md font-extrabold uppercase text-slate-950 tracking-wide underline">SANDBOX PILOT IMPLEMENTATION AGREEMENT</h3>
-                      <p className="text-[10px] text-slate-500 italic">Executed under State Innovative Procurement Policy Rules</p>
-                    </div>
-
-                    <p>
-                      This Agreement is entered into on this <strong>{new Date(activePilot.createdAt).toLocaleDateString()}</strong> by and between:
-                    </p>
-                    <p className="pl-4">
-                      <strong>The Department of {activePilot.departmentName}</strong>, State Government, hereinafter referred to as the "Disbursing Authority" (First Party), AND
-                    </p>
-                    <p className="pl-4">
-                      <strong>{activePilot.startupName}</strong>, a registered startup certified under DPIIT Number: <strong>DPIIT-893021</strong>, hereinafter referred to as the "Sandbox Partner" (Second Party).
-                    </p>
-
-                    <div className="space-y-2">
-                      <h4 className="font-bold text-slate-950 uppercase">1. OBJECTIVE & SCOPE OF SANDBOX</h4>
-                      <p>
-                        The Sandbox Partner shall deploy a controlled pilot sandbox for the technological challenge titled <strong>"{activePilot.problemTitle}"</strong>. 
-                        The technical deliverables, physical parameters, and deployment boundaries shall be strictly governed by the following Nodal Scope:
-                      </p>
-                      <p className="bg-slate-50 p-2.5 border-l-2 border-slate-300 italic font-sans text-[11px] text-slate-650">
-                        "{activePilot.scope}"
-                      </p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <h4 className="font-bold text-slate-950 uppercase">2. TIMELINE & ESCROW PARAMETERS</h4>
-                      <p>
-                        The Sandbox pilot is scheduled to commence on <strong>{new Date(activePilot.startDate).toLocaleDateString()}</strong> and run for a dedicated duration, finalizing on <strong>{new Date(activePilot.endDate).toLocaleDateString()}</strong>.
-                      </p>
-                      <p>
-                        The total budget allocated and locked in the secure platform Escrow account is <strong>₹{activePilot.budget.toLocaleString()}</strong>. Payments shall be disbursed automatically to the Sandbox Partner upon the approval of quantifiable progress milestones:
-                      </p>
-                      <ul className="list-disc pl-5 space-y-1">
-                        <li><strong>Milestone Tranche 1:</strong> Release equal to incremental progress percentage approved by Nodal Officer or SLA auto-approval.</li>
-                        <li><strong>Milestone Tranche 2 (Final):</strong> Remaining balance released upon 100% completion scorecard and expert panel closure.</li>
-                      </ul>
-                    </div>
-
-                    <div className="space-y-2">
-                      <h4 className="font-bold text-slate-950 uppercase">3. DATA SHARING & INTELLECTUAL PROPERTY</h4>
-                      <ul className="list-disc pl-5 space-y-1">
-                        <li><strong>Background IP:</strong> All proprietary designs, algorithms, code libraries, and software patents owned by the Sandbox Partner prior to the pilot shall remain the exclusive intellectual property of the Sandbox Partner.</li>
-                        <li><strong>Sandbox Data:</strong> All transactional logs, operational telemetry, citizen inputs, and performance metrics collected during the pilot sandbox shall belong exclusively to the Disbursing Authority.</li>
-                        <li><strong>Local License:</strong> The Sandbox Partner grants the First Party a non-exclusive, royalty-free, limited license to run and test the solution for the sandbox duration.</li>
-                      </ul>
-                    </div>
-
-                    <div className="space-y-2">
-                      <h4 className="font-bold text-slate-950 uppercase">4. INTENT TO PROCURE (EXEMPTION OVERRIDE)</h4>
-                      <p>
-                        Upon independent expert validation showing successful completion of sandbox deliverables meeting the required SLA (Service Level Agreements), the Disbursing Authority expresses its clear intent to transition this pilot into full-scale procurement under <strong>State Innovative Startup Procurement Exemption Rules</strong>, bypassing the GFR public bidding L1 requirements.
-                      </p>
-                    </div>
-
-                    {/* Signature Blocks */}
-                    <div className="grid grid-cols-2 gap-8 pt-8 font-sans">
-                      <div className="text-center space-y-8">
-                        <span className="text-[10px] text-slate-400 block border-b border-dashed border-slate-300 pb-2">Nodal Representative Signature</span>
-                        <div className="space-y-0.5">
-                          <p className="font-bold text-slate-800">{activePilot.departmentName}</p>
-                          <p className="text-[9px] text-slate-500 uppercase tracking-widest font-mono">Digitally Signed &bull; SECURE</p>
-                        </div>
-                      </div>
-                      <div className="text-center space-y-8">
-                        <span className="text-[10px] text-slate-400 block border-b border-dashed border-slate-300 pb-2">Sandbox Startup Officer Signature</span>
-                        <div className="space-y-0.5">
-                          <p className="font-bold text-slate-800">{activePilot.startupName}</p>
-                          <p className="text-[9px] text-slate-500 uppercase tracking-widest font-mono">Digitally Signed &bull; SECURE</p>
-                        </div>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
+                </form>
               </div>
             )}
+
+            {/* INDEPENDENT VALIDATION STAGE */}
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-bold text-slate-900">Independent Technical Validation</h3>
+                <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded border border-emerald-100">
+                  Validator: {activePilot.validatorName || 'Prof. Ravindra Kulkarni (COEP Tech)'}
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                {pilotUpdates.map(u => (
+                  <div key={u.id} className="p-4 rounded-xl border bg-slate-50 flex justify-between items-center gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-slate-900 text-xs">{u.milestoneName} ({u.progressPercent}%)</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${u.validationStatus === 'VALIDATED' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                          {u.validationStatus || u.status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500">{u.notes}</p>
+                      {u.validatorComments && (
+                        <p className="text-[11px] text-indigo-700 italic">Validator Comments: "{u.validatorComments}"</p>
+                      )}
+                    </div>
+                    {u.status === 'PENDING' && (
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => handleValidateMilestone(u.id, 'VALIDATED')}
+                          className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded text-xs cursor-pointer"
+                        >
+                          Validate & Disburse Escrow
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* FINAL PROCUREMENT & SCALE-UP DECISION */}
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-6">
+              <h3 className="text-lg font-bold text-slate-900">Final Procurement & Scale-Up Decision</h3>
+              
+              <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl space-y-1 text-emerald-900 text-xs">
+                <span className="font-bold block text-sm">Evidence-Based System Recommendation:</span>
+                <p>"Sandbox pilot achieved 94% of weighted KPI targets and passed independent validation by COEP Tech. Recommended for full procurement & state-wide scaling under Innovative Procurement Exemption Rules."</p>
+              </div>
+
+              <form onSubmit={handleSubmitDecision} className="space-y-4">
+                <div className="grid grid-cols-4 gap-3 text-xs font-bold">
+                  {[
+                    { id: 'PROCURE', label: 'Procure Solution' },
+                    { id: 'SCALE', label: 'Scale Across Department' },
+                    { id: 'EXTEND', label: 'Extend Pilot Sandbox' },
+                    { id: 'REJECT', label: 'Reject Solution' }
+                  ].map(opt => (
+                    <div 
+                      key={opt.id}
+                      onClick={() => setDecisionType(opt.id)}
+                      className={`p-3 rounded-xl border text-center cursor-pointer ${decisionType === opt.id ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'}`}
+                    >
+                      {opt.label}
+                    </div>
+                  ))}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nodal Procurement Remarks</label>
+                  <textarea rows={2} value={decisionRemarks} onChange={e => setDecisionRemarks(e.target.value)} className="w-full p-2.5 border rounded-lg text-xs" placeholder="Official remarks for state audit log..." />
+                </div>
+
+                <div className="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border">
+                  <input type="checkbox" id="gem" checked={publishToGem} onChange={e => setPublishToGem(e.target.checked)} className="w-4 h-4 text-indigo-600 rounded" />
+                  <label htmlFor="gem" className="text-xs font-bold text-slate-800 cursor-pointer">Publish Certified Sandbox Outcome to GeM Portal Marketplace</label>
+                </div>
+
+                <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-3 rounded-xl text-xs shadow-lg cursor-pointer">
+                  Submit Final Decision & Catalog to GeM
+                </button>
+              </form>
+            </div>
           </div>
         )}
 
@@ -2249,125 +2339,31 @@ export default function App() {
         </div>
       </footer>
 
-      {/* PILOT LAUNCH CONFIGURATION MODAL */}
-      {showPilotModal && selectedStartupRec && (
-        <div className="fixed inset-0 bg-slate-950/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 max-w-md w-full p-6 space-y-4">
-            <div>
-              <h3 className="text-xl font-black text-slate-800">Launch Sandbox Pilot</h3>
-              <p className="text-xs text-slate-500 mt-1">Configure pilot milestone timeline and lock budget in escrow.</p>
-            </div>
-
-            <div className="bg-indigo-50/50 p-3 rounded-lg border border-indigo-100/50 text-xs">
-              <p className="text-indigo-900"><strong className="font-semibold text-indigo-950">Startup Nodal Partner: </strong>{selectedStartupRec.startup.companyName}</p>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="block text-[10px] font-bold text-slate-700 uppercase mb-1">Pilot Project Scope</label>
-                <input 
-                  type="text" value={pilotForm.scope} 
-                  onChange={e => setPilotForm({...pilotForm, scope: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-700 uppercase mb-1">Start Date</label>
-                  <input 
-                    type="date" value={pilotForm.startDate} 
-                    onChange={e => setPilotForm({...pilotForm, startDate: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-700 uppercase mb-1">End Date</label>
-                  <input 
-                    type="date" value={pilotForm.endDate} 
-                    onChange={e => setPilotForm({...pilotForm, endDate: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-slate-700 uppercase mb-1">Lock Escrow Payout (₹)</label>
-                <input 
-                  type="number" value={pilotForm.budget} 
-                  onChange={e => setPilotForm({...pilotForm, budget: parseInt(e.target.value)})}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-3 pt-2">
-              <button 
-                onClick={submitLaunchPilot}
-                className="flex-grow bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-lg text-xs cursor-pointer shadow"
-              >
-                Approve & Launch
-              </button>
-              <button 
-                onClick={() => setShowPilotModal(false)}
-                className="px-4 py-2.5 border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 text-xs cursor-pointer"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* DPIIT REGISTRY LOOKUP MODAL OVERLAY */}
+      {/* DPIIT REGISTRY LOOKUP MODAL */}
       {showDpiitModal && selectedDpiitData && (
         <div className="fixed inset-0 bg-slate-950/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 max-w-md w-full p-6 space-y-4 relative">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-xl">
-                <ShieldCheck size={24} />
-              </div>
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 max-w-md w-full p-6 space-y-4">
+            <div className="flex justify-between items-start border-b pb-3">
               <div>
-                <h3 className="text-lg font-black text-slate-800">DPIIT Startup Registry</h3>
-                <span className="text-[9px] bg-emerald-50 text-emerald-700 border border-emerald-100 px-1.5 py-0.5 rounded font-extrabold uppercase">
-                  API Response Verified
-                </span>
+                <span className="text-[10px] font-bold text-emerald-600 uppercase">DPIIT Registry Lookup (Simulated API)</span>
+                <h3 className="text-lg font-black text-slate-900">{selectedDpiitData.dpiitNumber}</h3>
               </div>
+              <button onClick={() => setShowDpiitModal(false)} className="text-slate-400 hover:text-slate-600 font-bold text-sm">✕</button>
             </div>
-
-            <div className="divide-y divide-slate-100 text-xs font-semibold text-slate-700 pt-2 space-y-3">
-              <div className="pt-2">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wide block mb-0.5">Registration Number</span>
-                <p className="font-extrabold text-slate-900">{selectedDpiitData.dpiitNumber}</p>
-              </div>
-              <div className="pt-3">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wide block mb-0.5">Incorporation Date</span>
-                <p className="text-slate-700">{selectedDpiitData.incorporationDate}</p>
-              </div>
-              <div className="pt-3">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wide block mb-0.5">Registered Category</span>
-                <p className="text-slate-700">{selectedDpiitData.category}</p>
-              </div>
-              <div className="pt-3">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wide block mb-0.5">Registered Office Address</span>
-                <p className="text-slate-700 leading-relaxed">{selectedDpiitData.registeredAddress}</p>
-              </div>
-              <div className="pt-3">
-                <span className="text-[10px] text-slate-400 uppercase tracking-wide block mb-0.5">Active Company Directors</span>
-                <ul className="list-disc pl-4 space-y-0.5 text-slate-700 mt-1">
-                  {selectedDpiitData.directors.map((d, i) => (
-                    <li key={i}>{d}</li>
-                  ))}
+            <div className="space-y-2 text-xs">
+              <p><strong>Category:</strong> {selectedDpiitData.category}</p>
+              <p><strong>Incorporation Date:</strong> {selectedDpiitData.incorporationDate}</p>
+              <p><strong>Registered Address:</strong> {selectedDpiitData.registeredAddress}</p>
+              <div>
+                <strong>Active Directors:</strong>
+                <ul className="list-disc pl-4 mt-1 space-y-0.5 text-slate-600">
+                  {selectedDpiitData.directors.map((d, i) => <li key={i}>{d}</li>)}
                 </ul>
               </div>
             </div>
-
-            <div className="pt-4">
-              <button 
-                onClick={() => setShowDpiitModal(false)}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-lg text-xs cursor-pointer shadow transition-colors"
-              >
-                Close Verification
-              </button>
-            </div>
+            <button onClick={() => setShowDpiitModal(false)} className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-2 rounded-xl text-xs cursor-pointer">
+              Close Verification Modal
+            </button>
           </div>
         </div>
       )}
