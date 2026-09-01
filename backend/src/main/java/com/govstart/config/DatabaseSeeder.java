@@ -296,21 +296,25 @@ public class DatabaseSeeder implements CommandLineRunner {
     }
 
     private void seedAdmin() {
-        if (!userRepository.existsByEmail("admin@govstart.gov.in")) {
-            User admin = User.builder()
+        User admin = userRepository.findByEmail("admin@govstart.gov.in").orElse(null);
+        if (admin == null) {
+            admin = User.builder()
                     .name("Super Admin")
                     .email("admin@govstart.gov.in")
                     .passwordHash(passwordEncoder.encode("AdminPass_GovStart_2026!"))
                     .role(Role.ADMIN)
                     .status("ACTIVE")
                     .build();
-            userRepository.save(admin);
+        } else {
+            admin.setPasswordHash(passwordEncoder.encode("AdminPass_GovStart_2026!"));
+            admin.setStatus("ACTIVE");
         }
+        userRepository.save(admin);
     }
 
     private DepartmentProfile seedDepartment() {
-        User deptUser;
-        if (!userRepository.existsByEmail("dept@govstart.gov.in")) {
+        User deptUser = userRepository.findByEmail("dept@govstart.gov.in").orElse(null);
+        if (deptUser == null) {
             deptUser = User.builder()
                     .name("Urban Development Nodal Nanded")
                     .email("dept@govstart.gov.in")
@@ -318,10 +322,11 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .role(Role.DEPARTMENT)
                     .status("ACTIVE")
                     .build();
-            deptUser = userRepository.save(deptUser);
         } else {
-            deptUser = userRepository.findByEmail("dept@govstart.gov.in").orElse(null);
+            deptUser.setPasswordHash(passwordEncoder.encode("DeptPass_GovStart_2026!"));
+            deptUser.setStatus("ACTIVE");
         }
+        deptUser = userRepository.save(deptUser);
 
         DepartmentProfile profile = departmentProfileRepository.findByUser(deptUser).orElse(null);
         if (profile == null) {
@@ -338,8 +343,8 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private StartupProfile seedStartup(String companyName, String email, String password, String desc,
                                      String domain, java.util.List<String> tags, int teamSize, int founded, String dpiit) {
-        User user;
-        if (!userRepository.existsByEmail(email)) {
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
             user = User.builder()
                     .name(companyName)
                     .email(email)
@@ -347,10 +352,11 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .role(Role.STARTUP)
                     .status("ACTIVE")
                     .build();
-            user = userRepository.save(user);
         } else {
-            user = userRepository.findByEmail(email).orElse(null);
+            user.setPasswordHash(passwordEncoder.encode(password));
+            user.setStatus("ACTIVE");
         }
+        user = userRepository.save(user);
 
         StartupProfile profile = startupProfileRepository.findByUser(user).orElse(null);
         if (profile == null) {
@@ -373,8 +379,8 @@ public class DatabaseSeeder implements CommandLineRunner {
     }
 
     private ExpertProfile seedExpert(String name, String email, String password, String domain, String designation, java.util.List<String> tags) {
-        User user;
-        if (!userRepository.existsByEmail(email)) {
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
             user = User.builder()
                     .name(name)
                     .email(email)
@@ -382,10 +388,11 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .role(Role.EXPERT)
                     .status("ACTIVE")
                     .build();
-            user = userRepository.save(user);
         } else {
-            user = userRepository.findByEmail(email).orElse(null);
+            user.setPasswordHash(passwordEncoder.encode(password));
+            user.setStatus("ACTIVE");
         }
+        user = userRepository.save(user);
 
         ExpertProfile profile = expertProfileRepository.findByUser(user).orElse(null);
         if (profile == null) {
