@@ -649,7 +649,7 @@ export default function App() {
       {/* Header / Navbar */}
       <header className="bg-slate-900 text-white shadow-md border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => setView(auth ? 'dashboard' : 'landing')}>
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => setView('landing')} title="Return to Home Page">
             <div className="bg-indigo-600 p-2 rounded-lg text-white">
               <Building2 size={24} className="animate-pulse" />
             </div>
@@ -664,6 +664,14 @@ export default function App() {
           <nav className="flex items-center gap-4">
             {auth ? (
               <div className="flex items-center gap-4">
+                {view !== 'dashboard' && (
+                  <button 
+                    onClick={() => setView('dashboard')}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer shadow-sm transition-colors"
+                  >
+                    Go to Dashboard
+                  </button>
+                )}
                 <div className="text-right hidden sm:block">
                   <p className="text-sm font-semibold text-slate-200">{auth.name}</p>
                   <span className="inline-block text-[10px] bg-indigo-900/60 text-indigo-300 font-bold px-2 py-0.5 rounded border border-indigo-700/50 uppercase">
@@ -705,7 +713,7 @@ export default function App() {
           <div className="py-12 space-y-16">
             <div className="text-center space-y-6 max-w-3xl mx-auto">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
-                <Award size={12} className="text-indigo-600" /> SIH26136 Innovation Pathway
+                <Award size={12} className="text-indigo-600" /> Maharashtra Innovation Framework
               </div>
               <h1 className="text-5xl font-black text-slate-900 tracking-tight leading-none sm:text-6xl">
                 Bypassing Procurement Barriers for <span className="text-indigo-600">Startups</span>
@@ -2136,7 +2144,7 @@ export default function App() {
                     <h4 className="text-xl font-bold text-orange-950 tracking-wider">गैर न्यायिक / NON-JUDICIAL</h4>
                     <h2 className="text-2xl font-black text-orange-950 tracking-widest leading-none">भारत सरकार / GOVERNMENT OF INDIA</h2>
                     <h3 className="text-lg font-bold text-orange-900 leading-none">महाराष्ट्र शासन / GOVERNMENT OF MAHARASHTRA</h3>
-                    <div className="text-[10px] font-mono text-orange-800/80 mt-1">MH-500AA26136 &bull; SECURE TRANSACTION SANDBOX IDENTIFIER</div>
+                    <div className="text-[10px] font-mono text-orange-800/80 mt-1">MH-500AA90412 &bull; SECURE TRANSACTION SANDBOX IDENTIFIER</div>
                   </div>
 
                   {/* Stamp Paper watermark overlay */}
@@ -2148,7 +2156,7 @@ export default function App() {
                   <div className="space-y-6 text-slate-800 text-xs leading-relaxed max-w-3xl mx-auto font-serif">
                     <div className="text-center space-y-1">
                       <h3 className="text-md font-extrabold uppercase text-slate-950 tracking-wide underline">SANDBOX PILOT IMPLEMENTATION AGREEMENT</h3>
-                      <p className="text-[10px] text-slate-500 italic">Executed under the Maharashtra State Innovative Procurement Exemption Rules (SIH26136)</p>
+                      <p className="text-[10px] text-slate-500 italic">Executed under the Maharashtra State Innovative Procurement Policy Rules</p>
                     </div>
 
                     <p>
@@ -2236,7 +2244,7 @@ export default function App() {
             <Building2 size={16} className="text-indigo-400" />
             <span className="font-bold text-slate-200">GovStart Pilot Platform</span>
             <span>&bull;</span>
-            <span>Smart India Hackathon 2026</span>
+            <span>Government of Maharashtra Innovation Portal</span>
           </div>
           <div>
             <p>Designed for Maharashtra State Innovation Society (MSInS). Prototype active.</p>
