@@ -267,7 +267,7 @@ export default function App() {
   const [evalScores, setEvalScores] = useState({ feasibility: 4, innovation: 4, team: 4, cost: 4, comments: '' });
 
   // API Helper
-  const API_BASE = import.meta.env.VITE_API_BASE || '';
+  const API_BASE = import.meta.env.VITE_API_BASE || 'https://govstart-backend.onrender.com';
 
   const apiFetch = async (url: string, options: RequestInit = {}) => {
     const headers = new Headers(options.headers || {});
