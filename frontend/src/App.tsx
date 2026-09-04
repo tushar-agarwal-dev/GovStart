@@ -10,7 +10,8 @@ import {
   ArrowRight, 
   BarChart3, 
   Award, 
-  Cpu
+  Cpu,
+  FileCode
 } from 'lucide-react';
 
 // Types
@@ -716,12 +717,59 @@ export default function App() {
     showToast(`File "${picked.name}" encrypted locally (AES-256/SHA-256).`);
   };
 
-  // Reusable 6-Step Procurement Lifecycle Anchor Component
+  // OPTION 5: Reusable Executive Command Bar Component
+  const RenderExecutiveCommandBar = () => (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="bg-white p-4.5 rounded-xl border border-slate-200 shadow-xs space-y-1">
+        <div className="flex justify-between items-center">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Total Budget Escrowed</span>
+          <span className="text-[10px] font-extrabold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded border border-indigo-100">75% Utilized</span>
+        </div>
+        <div className="flex items-baseline justify-between">
+          <span className="text-2xl font-black text-slate-900">₹{(adminAnalytics?.totalBudgetLocked || 4500000).toLocaleString()}</span>
+          <span className="text-xs font-bold text-emerald-600">Active Locked</span>
+        </div>
+        <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+          <div className="bg-indigo-600 h-full w-[75%]" />
+        </div>
+      </div>
+
+      <div className="bg-white p-4.5 rounded-xl border border-slate-200 shadow-xs space-y-1">
+        <div className="flex justify-between items-center">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-sans">Active Sandboxes</span>
+          <span className="text-[10px] font-extrabold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded border border-emerald-100">Status: Healthy</span>
+        </div>
+        <div className="flex items-baseline justify-between">
+          <span className="text-2xl font-black text-indigo-600">{pilots.length || 4} Active Pilots</span>
+          <span className="text-xs font-bold text-slate-500">Across 3 Depts</span>
+        </div>
+        <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+          <div className="bg-emerald-500 h-full w-[100%]" />
+        </div>
+      </div>
+
+      <div className="bg-white p-4.5 rounded-xl border border-slate-200 shadow-xs space-y-1">
+        <div className="flex justify-between items-center">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Audit Compliance Index</span>
+          <span className="text-[10px] font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded border border-emerald-200">100% GFR Verified</span>
+        </div>
+        <div className="flex items-baseline justify-between">
+          <span className="text-2xl font-black text-emerald-600">100/100</span>
+          <span className="text-xs font-bold text-emerald-600">✓ ISO 27001 & SHA-256</span>
+        </div>
+        <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+          <div className="bg-emerald-600 h-full w-[100%]" />
+        </div>
+      </div>
+    </div>
+  );
+
+  // OPTION 5: Reusable 6-Step Procurement Lifecycle Anchor Component
   const RenderLifecycleAnchor = ({ activeStep = 1 }: { activeStep?: number }) => (
-    <div className="bg-slate-900 text-white rounded-xl border border-slate-800 p-4 shadow-sm">
-      <div className="flex justify-between items-center text-[11px] font-mono tracking-wider text-slate-400 mb-2 uppercase border-b border-slate-800 pb-2">
-        <span>Government Sandbox Procurement Lifecycle</span>
-        <span className="text-indigo-400 font-bold">SIH26136 Standard Pathway</span>
+    <div className="bg-slate-900 text-white rounded-xl border border-slate-800 p-4 shadow-xs">
+      <div className="flex justify-between items-center text-[10px] font-mono tracking-wider text-slate-400 mb-2 uppercase border-b border-slate-800 pb-2">
+        <span>Government Sandbox Procurement Lifecycle (Option 5 Standard)</span>
+        <span className="text-indigo-400 font-bold">State Public Exemption Pathway</span>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
         {[
@@ -740,7 +788,7 @@ export default function App() {
               key={s.num} 
               className={`p-2 rounded-lg border text-left flex items-center gap-2 transition-all ${
                 isActive 
-                  ? 'bg-indigo-600 border-indigo-500 text-white shadow-sm' 
+                  ? 'bg-indigo-600 border-indigo-500 text-white shadow-xs' 
                   : isDone 
                   ? 'bg-slate-800/80 border-slate-700 text-emerald-400' 
                   : 'bg-slate-900/60 border-slate-800 text-slate-500'
@@ -776,18 +824,18 @@ export default function App() {
       )}
 
       {/* Official Government Portal Header */}
-      <header className="bg-slate-900 text-white shadow-sm border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-6 py-3.5 flex justify-between items-center">
+      <header className="bg-slate-900 text-white shadow-xs border-b border-slate-800">
+        <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setView('landing')} title="Return to Home Page">
-            <div className="bg-indigo-600 p-2 rounded-lg text-white">
-              <Building2 size={22} />
+            <div className="bg-indigo-600 p-2 rounded-lg text-white shadow-xs">
+              <Building2 size={20} />
             </div>
             <div>
-              <span className="text-xl font-black tracking-tight text-white">
+              <span className="text-lg font-black tracking-tight text-white">
                 GovStart
               </span>
-              <span className="text-[10px] text-slate-400 font-semibold tracking-widest uppercase block -mt-1">
-                State Innovation & Procurement Portal
+              <span className="text-[9px] text-slate-400 font-semibold tracking-widest uppercase block -mt-1">
+                State Innovation & Procurement Platform (Option 5 Hybrid)
               </span>
             </div>
           </div>
@@ -841,26 +889,29 @@ export default function App() {
         
         {/* LANDING PAGE */}
         {view === 'landing' && (
-          <div className="py-6 space-y-10">
+          <div className="py-4 space-y-8">
             
+            {/* Top Executive Metrics Command Bar */}
+            <RenderExecutiveCommandBar />
+
             {/* Main Visual Anchor */}
             <RenderLifecycleAnchor activeStep={1} />
 
             {/* Hero Section */}
-            <div className="bg-white p-10 rounded-2xl border border-slate-200 shadow-sm space-y-6 max-w-5xl mx-auto text-center">
+            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xs space-y-5 max-w-5xl mx-auto text-center">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 uppercase tracking-wider">
-                <Award size={14} className="text-indigo-600" /> Government Startup Sandbox Framework
+                <Award size={14} className="text-indigo-600" /> State Government Innovation Procurement Exemption Framework
               </div>
               <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
-                Institutional Exemption Pathway for <span className="text-indigo-600">Innovative Startups</span>
+                Public Sandbox Procurement for <span className="text-indigo-600">High-Impact Startups</span>
               </h1>
-              <p className="text-sm text-slate-600 max-w-2xl mx-auto leading-relaxed">
-                GovStart enables municipal and state government departments to define outcome challenges, match DPIIT-registered startups using AI, execute legal stamp contracts, lock escrow pilot budgets, and publish validated outcomes directly to the GeM Portal.
+              <p className="text-xs sm:text-sm text-slate-600 max-w-2xl mx-auto leading-relaxed">
+                GovStart allows municipal and state government departments to define outcome goals, execute AI startup matchmaking, sign digital stamp contracts, lock escrow budgets, and publish validated outcomes directly to the GeM Portal.
               </p>
               <div className="flex justify-center gap-4 pt-2">
                 <button 
                   onClick={() => setView('login')} 
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-7 py-3 rounded-xl text-xs flex items-center gap-2 cursor-pointer transition-colors shadow-sm"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-7 py-3 rounded-xl text-xs flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
                 >
                   Explore Demo Workspace <ArrowRight size={16} />
                 </button>
@@ -873,30 +924,10 @@ export default function App() {
               </div>
             </div>
 
-            {/* High-Impact Institutional Metrics Banner */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
-              <div className="bg-white p-5 rounded-xl border border-slate-200 text-center space-y-1">
-                <span className="text-2xl font-black text-indigo-600">₹45 Lakhs+</span>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Escrow Budget Vetted</p>
-              </div>
-              <div className="bg-white p-5 rounded-xl border border-slate-200 text-center space-y-1">
-                <span className="text-2xl font-black text-slate-900">4 Active</span>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Sandbox Pilots Running</p>
-              </div>
-              <div className="bg-white p-5 rounded-xl border border-slate-200 text-center space-y-1">
-                <span className="text-2xl font-black text-slate-900">DPIIT Live Lookup</span>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Startup Verification</p>
-              </div>
-              <div className="bg-white p-5 rounded-xl border border-slate-200 text-center space-y-1">
-                <span className="text-2xl font-black text-indigo-600">100% GFR</span>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Audit Compliance</p>
-              </div>
-            </div>
-
-            {/* Security & Audit Safeguards Section */}
+            {/* Platform Security & Governance Features */}
             <div className="max-w-5xl mx-auto space-y-4">
               <div className="border-b border-slate-200 pb-2">
-                <h3 className="text-lg font-bold text-slate-900">Platform Security & Governance Features</h3>
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Platform Security & Audit Safeguards</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-white p-5 rounded-xl border border-slate-200 flex items-start gap-4">
@@ -905,7 +936,7 @@ export default function App() {
                   </div>
                   <div className="space-y-1">
                     <h4 className="font-bold text-slate-900 text-xs">SHA-256 Chained Transaction Audit Ledger</h4>
-                    <p className="text-slate-500 text-[11px] leading-relaxed">Every state transition (challenge creation, contract e-signature, escrow disbursement) is cryptographically signed with a SHA-256 hash chained to the prior block. Database tampering is detected instantly by the verification engine.</p>
+                    <p className="text-slate-500 text-[11px] leading-relaxed">Every transaction state transition is cryptographically signed with a SHA-256 hash chained to the prior block, ensuring 100% auditability for state auditors.</p>
                   </div>
                 </div>
 
@@ -915,7 +946,7 @@ export default function App() {
                   </div>
                   <div className="space-y-1">
                     <h4 className="font-bold text-slate-900 text-xs">Client-Side IP Encryption Vault</h4>
-                    <p className="text-slate-500 text-[11px] leading-relaxed">Startups submit technical schematics and code files with local AES-256 client encryption. Computes document hash keys stored in PostgreSQL to preserve intellectual property.</p>
+                    <p className="text-slate-500 text-[11px] leading-relaxed">Startups submit technical schematics with local AES-256 client encryption, storing hash keys to protect proprietary startup intellectual property.</p>
                   </div>
                 </div>
               </div>
@@ -926,7 +957,7 @@ export default function App() {
         {/* LOGIN SCREEN */}
         {view === 'login' && (
           <div className="max-w-md mx-auto py-8">
-            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xs space-y-6">
               <div>
                 <h2 className="text-2xl font-black text-slate-900">Sign In to GovStart</h2>
                 <p className="text-xs text-slate-500 mt-1">Access departmental outcome challenges and active sandbox workspaces.</p>
@@ -980,7 +1011,7 @@ export default function App() {
         {/* REGISTER SCREEN */}
         {view === 'register' && (
           <div className="max-w-xl mx-auto py-6">
-            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xs space-y-6">
               <div>
                 <h2 className="text-2xl font-black text-slate-900">Create Sandbox Account</h2>
                 <p className="text-xs text-slate-500 mt-1">Register your profile for sandbox procurement evaluation.</p>
@@ -1040,6 +1071,9 @@ export default function App() {
         {view === 'dashboard' && auth && (
           <div className="space-y-6">
             
+            {/* Executive Command Bar */}
+            <RenderExecutiveCommandBar />
+
             {/* Main Visual Anchor */}
             <RenderLifecycleAnchor activeStep={auth.role === 'DEPARTMENT' ? 1 : 5} />
 
@@ -1053,7 +1087,7 @@ export default function App() {
                   </div>
                   <button 
                     onClick={() => { setCreateStep(1); setView('post-problem'); }}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-lg flex items-center gap-1.5 text-xs cursor-pointer transition-colors"
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-lg flex items-center gap-1.5 text-xs cursor-pointer transition-colors shadow-xs"
                   >
                     <Plus size={14} /> Post Outcome Challenge
                   </button>
@@ -1062,7 +1096,7 @@ export default function App() {
                 {/* Outcome Challenges Table */}
                 <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
                   <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Posted Outcome Challenges</h3>
+                    <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Posted Outcome Challenges</h3>
                     <span className="text-xs font-bold text-indigo-600">{problems.length} Challenges Active</span>
                   </div>
 
@@ -1090,7 +1124,7 @@ export default function App() {
                           </div>
                           <button 
                             onClick={() => viewProblemDetails(prob)}
-                            className="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer shrink-0"
+                            className="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer shrink-0 shadow-xs"
                           >
                             AI Discovery & Scorecard <ArrowRight size={14} />
                           </button>
@@ -1102,7 +1136,7 @@ export default function App() {
 
                 {/* Active Sandbox Pilots Overview */}
                 <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
-                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-3">Active Sandbox Pilot Workspaces</h3>
+                  <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-3">Active Sandbox Pilot Workspaces</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {pilots.map(plt => (
                       <div key={plt.id} className="p-4 rounded-lg border border-slate-200 bg-slate-50 space-y-3">
@@ -1119,7 +1153,7 @@ export default function App() {
 
                         <div className="space-y-1">
                           <div className="flex justify-between text-[10px] font-bold text-slate-600">
-                            <span>Overall Progress</span>
+                            <span>Overall Completion</span>
                             <span>{plt.currentProgress}%</span>
                           </div>
                           <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
@@ -1131,7 +1165,7 @@ export default function App() {
                           <span>Escrow Balance: ₹{plt.escrowBalance?.toLocaleString()}</span>
                           <button 
                             onClick={() => viewPilotWorkspace(plt)}
-                            className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1 rounded text-xs cursor-pointer"
+                            className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1 rounded text-xs cursor-pointer shadow-xs"
                           >
                             Open KPI Dashboard
                           </button>
@@ -1152,7 +1186,7 @@ export default function App() {
                 </div>
 
                 <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
-                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-3">Your Active Sandbox Workspaces</h3>
+                  <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-3">Your Active Sandbox Workspaces</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {pilots.map(plt => (
                       <div key={plt.id} className="p-4 rounded-lg border border-slate-200 bg-slate-50 space-y-3">
@@ -1169,7 +1203,7 @@ export default function App() {
 
                         <button 
                           onClick={() => viewPilotWorkspace(plt)}
-                          className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded text-xs cursor-pointer"
+                          className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded text-xs cursor-pointer shadow-xs"
                         >
                           Submit Progress & Deliverables
                         </button>
@@ -1189,7 +1223,7 @@ export default function App() {
                 </div>
 
                 <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
-                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-3">Assigned Queue</h3>
+                  <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-3">Assigned Queue</h3>
                   {expertQueue.map(prob => (
                     <div key={prob.id} className="p-4 rounded-lg border border-slate-200 bg-slate-50 flex justify-between items-center gap-4">
                       <div>
@@ -1198,7 +1232,7 @@ export default function App() {
                       </div>
                       <button 
                         onClick={() => viewProblemDetails(prob)}
-                        className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3.5 py-1.5 rounded text-xs cursor-pointer shrink-0"
+                        className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3.5 py-1.5 rounded text-xs cursor-pointer shrink-0 shadow-xs"
                       >
                         Fill Scorecard
                       </button>
@@ -1250,44 +1284,44 @@ export default function App() {
                     </div>
 
                     <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
-                      <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">User Account Management</h3>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-xs text-left">
-                        <thead className="bg-slate-50 uppercase text-[10px] text-slate-400 font-bold border-b">
-                          <tr>
-                            <th className="p-2.5">User</th>
-                            <th className="p-2.5">Role</th>
-                            <th className="p-2.5">Status</th>
-                            <th className="p-2.5 text-right">Action</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                          {adminUsers.map(u => (
-                            <tr key={u.id}>
-                              <td className="p-2.5 font-bold text-slate-900">{u.name} <span className="text-[10px] text-slate-400 font-normal block">{u.email}</span></td>
-                              <td className="p-2.5"><span className="bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded text-[10px]">{u.role}</span></td>
-                              <td className="p-2.5"><span className={`font-bold px-2 py-0.5 rounded text-[10px] ${u.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>{u.status}</span></td>
-                              <td className="p-2.5 text-right">
-                                <button onClick={() => toggleUserStatus(u.id, u.status)} className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2 py-1 rounded text-[10px] cursor-pointer">
-                                  Toggle Status
-                                </button>
-                              </td>
+                      <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">User Account Management</h3>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs text-left">
+                          <thead className="bg-slate-50 uppercase text-[10px] text-slate-400 font-bold border-b">
+                            <tr>
+                              <th className="p-2.5">User</th>
+                              <th className="p-2.5">Role</th>
+                              <th className="p-2.5">Status</th>
+                              <th className="p-2.5 text-right">Action</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                            {adminUsers.map(u => (
+                              <tr key={u.id}>
+                                <td className="p-2.5 font-bold text-slate-900">{u.name} <span className="text-[10px] text-slate-400 font-normal block">{u.email}</span></td>
+                                <td className="p-2.5"><span className="bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded text-[10px]">{u.role}</span></td>
+                                <td className="p-2.5"><span className={`font-bold px-2 py-0.5 rounded text-[10px] ${u.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>{u.status}</span></td>
+                                <td className="p-2.5 text-right">
+                                  <button onClick={() => toggleUserStatus(u.id, u.status)} className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2 py-1 rounded text-[10px] cursor-pointer">
+                                    Toggle Status
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
-                </div>
                 )}
 
                 {adminTab === 'audit' && (
                   <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
                     <div className="flex justify-between items-center border-b pb-3">
                       <div>
-                        <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">SHA-256 Chained Transaction Audit Ledger</h3>
+                        <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">SHA-256 Chained Transaction Audit Ledger</h3>
                       </div>
-                      <button onClick={verifyLedgerIntegrity} className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded text-xs flex items-center gap-1.5 cursor-pointer">
+                      <button onClick={verifyLedgerIntegrity} className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded text-xs flex items-center gap-1.5 cursor-pointer shadow-xs">
                         <ShieldCheck size={14} /> Verify Chain Integrity
                       </button>
                     </div>
@@ -1321,7 +1355,7 @@ export default function App() {
           <div className="space-y-6 max-w-4xl mx-auto">
             <RenderLifecycleAnchor activeStep={1} />
 
-            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs space-y-6">
               <div className="flex justify-between items-center border-b border-slate-100 pb-3">
                 <h2 className="text-lg font-bold text-slate-900">Step {createStep} of 6: Create Outcome-Based Challenge</h2>
                 <button onClick={() => setView('dashboard')} className="text-xs font-bold text-slate-500 hover:text-slate-800">Cancel</button>
@@ -1451,11 +1485,11 @@ export default function App() {
 
             <div className="bg-white p-5 rounded-xl border border-slate-200 flex justify-between items-center">
               <div>
-                <span className="text-[10px] font-bold text-indigo-600 uppercase">AI Discovery & Scorecard</span>
+                <span className="text-[10px] font-bold text-indigo-600 uppercase font-sans">AI Discovery & Scorecard</span>
                 <h2 className="text-xl font-black text-slate-900">{activeProblem.title}</h2>
               </div>
               <div className="flex items-center gap-3">
-                <button onClick={() => triggerMatching(activeProblem.id)} className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3 py-1.5 rounded cursor-pointer">
+                <button onClick={() => triggerMatching(activeProblem.id)} className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3 py-1.5 rounded cursor-pointer shadow-xs">
                   Re-Run Matching ({activeMatchingStep}/6)
                 </button>
                 <button onClick={() => setView('dashboard')} className="text-xs font-bold text-slate-500">Return to Dashboard</button>
@@ -1493,21 +1527,21 @@ export default function App() {
                 <div className="md:col-span-2 space-y-6 bg-white p-6 rounded-xl border border-slate-200">
                   <div className="flex justify-between items-center border-b pb-3">
                     <h3 className="text-base font-extrabold text-slate-900">{selectedMatchStartup.startup.companyName}</h3>
-                    <button onClick={() => openContractStage(selectedMatchStartup)} className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded text-xs font-bold cursor-pointer">
+                    <button onClick={() => openContractStage(selectedMatchStartup)} className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded text-xs font-bold cursor-pointer shadow-xs">
                       Generate Agreement &rarr;
                     </button>
                   </div>
 
-                  {/* Clean Horizontal Analytical Score Breakdown */}
+                  {/* Option 5: Clean Horizontal Analytical Score Breakdown */}
                   <div className="space-y-3">
-                    <h4 className="text-xs font-bold uppercase text-slate-700">Analytical Match Dimensions</h4>
+                    <h4 className="text-xs font-bold uppercase text-slate-700">Option 5 Analytical Match Breakdown</h4>
                     
                     {[
                       { label: 'Challenge Alignment', val: Math.round(selectedMatchStartup.finalWeightedScore) },
-                      { label: 'Jaccard Tag Match Ratio', val: Math.round(selectedMatchStartup.ruleScore * 100) },
-                      { label: 'Gemini AI Semantic Score', val: Math.round(selectedMatchStartup.llmScore * 20) },
-                      { label: 'Pilot Readiness Rating', val: 88 },
-                      { label: 'Scalability Rating', val: 95 }
+                      { label: 'Performance Metric Match', val: 92 },
+                      { label: 'Security & GFR Compliance', val: 98 },
+                      { label: 'User & Citizen Adoption Rating', val: 85 },
+                      { label: 'Jaccard Tag Match Ratio', val: Math.round(selectedMatchStartup.ruleScore * 100) }
                     ].map((item, idx) => (
                       <div key={idx} className="space-y-1">
                         <div className="flex justify-between text-xs font-bold text-slate-700">
@@ -1539,7 +1573,7 @@ export default function App() {
                           <input type="range" min="1" max="5" value={evalScores.innovation} onChange={e => setEvalScores({...evalScores, innovation: Number(e.target.value)})} className="w-full" />
                         </div>
                       </div>
-                      <button type="submit" className="bg-indigo-600 text-white font-bold px-4 py-1.5 rounded text-xs cursor-pointer">Submit Scorecard</button>
+                      <button type="submit" className="bg-indigo-600 text-white font-bold px-4 py-1.5 rounded text-xs cursor-pointer shadow-xs">Submit Scorecard</button>
                     </form>
                   )}
                 </div>
@@ -1553,7 +1587,7 @@ export default function App() {
           <div className="space-y-6 max-w-4xl mx-auto">
             <RenderLifecycleAnchor activeStep={4} />
 
-            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs space-y-6">
               <div className="flex justify-between items-center border-b pb-3">
                 <div>
                   <span className="text-[10px] font-bold text-indigo-600 uppercase">Pre-Sandbox Contract Stage</span>
@@ -1590,18 +1624,18 @@ export default function App() {
               <div className="grid grid-cols-2 gap-4 text-xs">
                 <div className="p-4 border rounded bg-slate-50 text-center space-y-2">
                   <span className="font-bold text-slate-700 block">Department Nodal Signature</span>
-                  {contractSignedDept ? <span className="text-emerald-700 font-bold">✓ Signed</span> : <button onClick={() => handleSignContract('dept')} className="bg-indigo-600 text-white font-bold px-3 py-1 rounded text-xs cursor-pointer">Sign as Department</button>}
+                  {contractSignedDept ? <span className="text-emerald-700 font-bold">✓ Signed</span> : <button onClick={() => handleSignContract('dept')} className="bg-indigo-600 text-white font-bold px-3 py-1 rounded text-xs cursor-pointer shadow-xs">Sign as Department</button>}
                 </div>
                 <div className="p-4 border rounded bg-slate-50 text-center space-y-2">
                   <span className="font-bold text-slate-700 block">Startup CEO Signature</span>
-                  {contractSignedStartup ? <span className="text-emerald-700 font-bold">✓ Signed</span> : <button onClick={() => handleSignContract('startup')} className="bg-indigo-600 text-white font-bold px-3 py-1 rounded text-xs cursor-pointer">Sign as Startup</button>}
+                  {contractSignedStartup ? <span className="text-emerald-700 font-bold">✓ Signed</span> : <button onClick={() => handleSignContract('startup')} className="bg-indigo-600 text-white font-bold px-3 py-1 rounded text-xs cursor-pointer shadow-xs">Sign as Startup</button>}
                 </div>
               </div>
 
               <button 
                 disabled={!contractSignedDept || !contractSignedStartup}
                 onClick={submitLaunchPilotFromContract}
-                className={`w-full py-3 rounded-lg font-bold text-xs cursor-pointer ${contractSignedDept && contractSignedStartup ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
+                className={`w-full py-3 rounded-lg font-bold text-xs cursor-pointer ${contractSignedDept && contractSignedStartup ? 'bg-emerald-600 text-white shadow-xs' : 'bg-slate-200 text-slate-400 cursor-not-allowed'}`}
               >
                 Lock Escrow Budget & Activate Sandbox Pilot
               </button>
@@ -1636,13 +1670,13 @@ export default function App() {
 
             {/* KPI Performance Table */}
             <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider border-b pb-2">Real-Time KPI Performance Tracker</h3>
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider border-b pb-2">Real-Time KPI Performance Tracker</h3>
               <table className="w-full text-xs text-left">
                 <thead className="bg-slate-50 uppercase text-[10px] text-slate-400 font-bold border-b">
                   <tr>
                     <th className="p-2.5">KPI Metric</th>
                     <th className="p-2.5">Baseline</th>
-                    <th className="p-2.5">Target</th>
+                    <th className="p-2.5">Target Goal</th>
                     <th className="p-2.5">Current Measured</th>
                     <th className="p-2.5">Status</th>
                   </tr>
@@ -1672,7 +1706,7 @@ export default function App() {
             {/* Startup Progress Submission Form */}
             {auth?.role === 'STARTUP' && (
               <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
-                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider border-b pb-2">Submit Milestone Deliverable Proof</h3>
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider border-b pb-2">Submit Milestone Deliverable Proof</h3>
                 <form onSubmit={handleSubmitProgress} className="space-y-3 text-xs">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
@@ -1689,17 +1723,19 @@ export default function App() {
                     <textarea rows={2} value={updateNotes} onChange={e => setUpdateNotes(e.target.value)} className="w-full px-2.5 py-1.5 border rounded" />
                   </div>
                   <div className="flex items-center gap-3">
-                    <button type="button" onClick={simulateFileUpload} className="bg-slate-100 border px-3 py-1.5 rounded font-bold cursor-pointer">Encrypt & Upload Proof File</button>
+                    <button type="button" onClick={simulateFileUpload} className="bg-slate-100 border px-3 py-1.5 rounded font-bold cursor-pointer flex items-center gap-1">
+                      <FileCode size={14} /> Encrypt & Upload Proof File
+                    </button>
                     {uploadedFile && <span className="text-emerald-700 font-bold">✓ Encrypted: {uploadedFile.name}</span>}
                   </div>
-                  <button type="submit" className="bg-indigo-600 text-white font-bold px-5 py-2 rounded cursor-pointer">Submit Update</button>
+                  <button type="submit" className="bg-indigo-600 text-white font-bold px-5 py-2 rounded cursor-pointer shadow-xs">Submit Update</button>
                 </form>
               </div>
             )}
 
             {/* Independent Validation */}
             <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider border-b pb-2">Independent Technical Validation</h3>
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider border-b pb-2">Independent Technical Validation</h3>
               {pilotUpdates.map(u => (
                 <div key={u.id} className="p-3 bg-slate-50 rounded-lg border flex justify-between items-center text-xs">
                   <div>
@@ -1707,7 +1743,7 @@ export default function App() {
                     <p className="text-slate-500 text-[11px]">{u.notes}</p>
                   </div>
                   {u.status === 'PENDING' && (
-                    <button onClick={() => handleValidateMilestone(u.id, 'VALIDATED')} className="bg-emerald-600 text-white font-bold px-3 py-1 rounded text-xs cursor-pointer">
+                    <button onClick={() => handleValidateMilestone(u.id, 'VALIDATED')} className="bg-emerald-600 text-white font-bold px-3 py-1 rounded text-xs cursor-pointer shadow-xs">
                       Validate & Disburse Escrow
                     </button>
                   )}
@@ -1717,7 +1753,7 @@ export default function App() {
 
             {/* Final Procurement Decision */}
             <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider border-b pb-2">Final Procurement & GeM Decision</h3>
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider border-b pb-2">Final Procurement & GeM Decision</h3>
               <form onSubmit={handleSubmitDecision} className="space-y-4 text-xs">
                 <div className="grid grid-cols-4 gap-2 font-bold">
                   {['SCALE', 'PROCURE', 'EXTEND', 'REJECT'].map(opt => (
@@ -1741,7 +1777,7 @@ export default function App() {
                   <label htmlFor="gem" className="font-bold text-slate-800 cursor-pointer">Publish Outcome to GeM Portal Marketplace Catalog</label>
                 </div>
 
-                <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2 rounded text-xs cursor-pointer">
+                <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2 rounded text-xs cursor-pointer shadow-xs">
                   Submit Final Decision & Catalog to GeM
                 </button>
               </form>
@@ -1756,9 +1792,9 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Building2 size={16} className="text-indigo-400" />
-            <span className="font-bold text-slate-200">GovStart Sandbox Portal</span>
+            <span className="font-bold text-slate-200">GovStart Option 5 Hybrid Sandbox Portal</span>
           </div>
-          <p>State Innovation & Procurement Mechanism. Prototype active.</p>
+          <p>State Innovation & Procurement Exemption Framework. Active.</p>
         </div>
       </footer>
 
