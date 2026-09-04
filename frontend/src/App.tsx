@@ -1608,8 +1608,8 @@ export default function App() {
                     
                     {[
                       { label: 'Overall Challenge Alignment', val: Math.min(100, Math.round(selectedMatchStartup.finalWeightedScore)) },
-                      { label: 'Jaccard Syntactic Tag Match', val: Math.min(100, Math.round(selectedMatchStartup.ruleScore)) },
-                      { label: 'Gemini AI Semantic Score', val: Math.min(100, Math.round(selectedMatchStartup.llmScore)) },
+                      { label: 'Jaccard Syntactic Tag Match', val: Math.min(100, Math.round(selectedMatchStartup.ruleScore <= 1.0 ? selectedMatchStartup.ruleScore * 100 : selectedMatchStartup.ruleScore)) },
+                      { label: 'Gemini AI Semantic Score', val: Math.min(100, Math.round(selectedMatchStartup.llmScore <= 5.0 && selectedMatchStartup.llmScore > 0 ? selectedMatchStartup.llmScore * 20 : selectedMatchStartup.llmScore)) },
                       { label: 'Security & GFR Compliance', val: 98 },
                       { label: 'Pilot Operational Readiness', val: 92 }
                     ].map((item, idx) => (
