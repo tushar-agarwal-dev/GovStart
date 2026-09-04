@@ -887,22 +887,26 @@ export default function App() {
       {/* Main Content Area */}
       <main className="flex-grow max-w-7xl w-full mx-auto p-6 space-y-6">
         
-        {/* LANDING PAGE */}
+        {/* LANDING PAGE REDESIGN */}
         {view === 'landing' && (
-          <div className="py-4 space-y-8">
+          <div className="py-4 space-y-8 max-w-6xl mx-auto">
             
             {/* Hero Section */}
-            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xs space-y-5 max-w-5xl mx-auto text-center">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 uppercase tracking-wider">
-                <Award size={14} className="text-indigo-600" /> State Government Innovation Procurement Exemption Framework
+            <div className="bg-white p-8 sm:p-10 rounded-2xl border border-slate-200 shadow-xs space-y-6 text-center">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 uppercase tracking-wider">
+                <Award size={14} className="text-indigo-600" /> State Public Procurement & Innovation Exemption Framework
               </div>
+              
               <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
-                Public Sandbox Procurement for <span className="text-indigo-600">High-Impact Startups</span>
+                Direct Sandbox Procurement for <br className="hidden sm:block" />
+                <span className="text-indigo-600">High-Impact Innovators</span>
               </h1>
-              <p className="text-xs sm:text-sm text-slate-600 max-w-2xl mx-auto leading-relaxed">
-                GovStart allows municipal and state government departments to define outcome goals, execute AI startup matchmaking, sign digital stamp contracts, lock escrow budgets, and publish validated outcomes directly to the GeM Portal.
+              
+              <p className="text-xs sm:text-sm text-slate-600 max-w-3xl mx-auto leading-relaxed">
+                GovStart empowers municipal and state government departments to define outcome goals, run explainable AI startup matching, execute digital stamp contracts, lock escrow pilot budgets, and catalog certified outcomes to the GeM Portal.
               </p>
-              <div className="flex justify-center gap-4 pt-2">
+              
+              <div className="flex flex-wrap justify-center gap-4 pt-2">
                 <button 
                   onClick={() => setView('login')} 
                   className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-7 py-3 rounded-xl text-xs flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
@@ -916,16 +920,88 @@ export default function App() {
                   Register Account
                 </button>
               </div>
+
+              {/* Quick Persona Demo Auto-Fill Shortcuts */}
+              <div className="pt-6 border-t border-slate-100">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">1-Click Live Persona Demos</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  <button onClick={() => { fillCredentials('dept'); setView('login'); }} className="text-[11px] font-semibold bg-slate-50 hover:bg-indigo-50 hover:border-indigo-200 border border-slate-200 py-1.5 px-3 rounded-lg cursor-pointer">🏛️ Municipal Dept</button>
+                  <button onClick={() => { fillCredentials('startup'); setView('login'); }} className="text-[11px] font-semibold bg-slate-50 hover:bg-indigo-50 hover:border-indigo-200 border border-slate-200 py-1.5 px-3 rounded-lg cursor-pointer">🚀 EcoTech Startup</button>
+                  <button onClick={() => { fillCredentials('expert'); setView('login'); }} className="text-[11px] font-semibold bg-slate-50 hover:bg-indigo-50 hover:border-indigo-200 border border-slate-200 py-1.5 px-3 rounded-lg cursor-pointer">🎓 Academic Expert</button>
+                  <button onClick={() => { fillCredentials('admin'); setView('login'); }} className="text-[11px] font-semibold bg-slate-50 hover:bg-indigo-50 hover:border-indigo-200 border border-slate-200 py-1.5 px-3 rounded-lg cursor-pointer">🛡️ Super Admin</button>
+                </div>
+              </div>
+            </div>
+
+            {/* High-Impact Institutional Metrics Banner */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white p-5 rounded-xl border border-slate-200 text-center space-y-1">
+                <span className="text-2xl font-black text-indigo-600">₹45 Lakhs+</span>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Escrow Budget Vetted</p>
+              </div>
+              <div className="bg-white p-5 rounded-xl border border-slate-200 text-center space-y-1">
+                <span className="text-2xl font-black text-slate-900">4 Active</span>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Sandbox Pilots Running</p>
+              </div>
+              <div className="bg-white p-5 rounded-xl border border-slate-200 text-center space-y-1">
+                <span className="text-2xl font-black text-slate-900">DPIIT Live Lookup</span>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Startup Registry API</p>
+              </div>
+              <div className="bg-white p-5 rounded-xl border border-slate-200 text-center space-y-1">
+                <span className="text-2xl font-black text-emerald-600">100% GFR</span>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Audit Compliance</p>
+              </div>
+            </div>
+
+            {/* 6-Step Interactive Procurement Pathway Diagram */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+              <div className="border-b border-slate-100 pb-3">
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">6-Step Institutional Exemption Pathway</h3>
+                <p className="text-xs text-slate-500 mt-0.5">End-to-end workflow from challenge definition to GeM Portal marketplace scaling.</p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
+                  <span className="text-[10px] font-extrabold text-indigo-600 uppercase">Step 1 &bull; Challenge Posting</span>
+                  <h4 className="font-extrabold text-slate-900">Outcome Goal Definition</h4>
+                  <p className="text-slate-500 text-[11px]">Nodal officers define measurable success criteria and KPI targets rather than rigid hardware specs.</p>
+                </div>
+                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
+                  <span className="text-[10px] font-extrabold text-indigo-600 uppercase">Step 2 &bull; AI Matchmaking</span>
+                  <h4 className="font-extrabold text-slate-900">Dual-Engine Discovery</h4>
+                  <p className="text-slate-500 text-[11px]">Syntactic Jaccard tag match + Gemini 1.5 Flash AI semantic score with DPIIT verification bonus.</p>
+                </div>
+                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
+                  <span className="text-[10px] font-extrabold text-indigo-600 uppercase">Step 3 &bull; Expert Vetting</span>
+                  <h4 className="font-extrabold text-slate-900">Academic Scorecards</h4>
+                  <p className="text-slate-500 text-[11px]">University professors (COEP/VJTI) execute quantitative technical feasibility scorecards.</p>
+                </div>
+                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
+                  <span className="text-[10px] font-extrabold text-indigo-600 uppercase">Step 4 &bull; Legal Signing</span>
+                  <h4 className="font-extrabold text-slate-900">E-Signature Stamp Agreements</h4>
+                  <p className="text-slate-500 text-[11px]">Dual e-signature stamp paper agreements with mutual NDA and IP protection clauses.</p>
+                </div>
+                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
+                  <span className="text-[10px] font-extrabold text-indigo-600 uppercase">Step 5 &bull; Active Sandbox</span>
+                  <h4 className="font-extrabold text-slate-900">Milestone Escrow Payouts</h4>
+                  <p className="text-slate-500 text-[11px]">Real-time KPI performance measurement with milestone-linked escrow tranches (25%, 35%, 40%).</p>
+                </div>
+                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
+                  <span className="text-[10px] font-extrabold text-indigo-600 uppercase">Step 6 &bull; GeM Cataloging</span>
+                  <h4 className="font-extrabold text-slate-900">State-Wide Procurement</h4>
+                  <p className="text-slate-500 text-[11px]">Certified sandbox outcomes published directly to the GeM Portal Marketplace for state scale-up.</p>
+                </div>
+              </div>
             </div>
 
             {/* Platform Security & Governance Features */}
-            <div className="max-w-5xl mx-auto space-y-4">
+            <div className="space-y-4">
               <div className="border-b border-slate-200 pb-2">
-                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Platform Security & Audit Safeguards</h3>
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Platform Security & Audit Safeguards</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-white p-5 rounded-xl border border-slate-200 flex items-start gap-4">
-                  <div className="p-2.5 bg-slate-100 text-slate-800 rounded-lg">
+                  <div className="p-2.5 bg-slate-100 text-slate-800 rounded-lg shrink-0">
                     <Cpu size={20} />
                   </div>
                   <div className="space-y-1">
@@ -935,7 +1011,7 @@ export default function App() {
                 </div>
 
                 <div className="bg-white p-5 rounded-xl border border-slate-200 flex items-start gap-4">
-                  <div className="p-2.5 bg-slate-100 text-slate-800 rounded-lg">
+                  <div className="p-2.5 bg-slate-100 text-slate-800 rounded-lg shrink-0">
                     <ShieldCheck size={20} />
                   </div>
                   <div className="space-y-1">
