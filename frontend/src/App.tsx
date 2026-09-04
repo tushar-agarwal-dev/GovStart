@@ -966,7 +966,19 @@ export default function App() {
     );
   }
 
-  if (view === 'dashboard' && auth && auth.role === 'DEPARTMENT') {
+  const getNormalizedRole = (role?: string) => {
+    if (!role) return 'DEPARTMENT';
+    const upper = role.toUpperCase();
+    if (upper.includes('DEPT') || upper.includes('DEPARTMENT')) return 'DEPARTMENT';
+    if (upper.includes('STARTUP')) return 'STARTUP';
+    if (upper.includes('EXPERT')) return 'EXPERT';
+    if (upper.includes('ADMIN')) return 'ADMIN';
+    return 'DEPARTMENT';
+  };
+
+  const currentRole = auth ? getNormalizedRole(auth.role) : null;
+
+  if (view === 'dashboard' && auth && (currentRole === 'DEPARTMENT' || (currentRole !== null && !['STARTUP', 'EXPERT', 'ADMIN'].includes(currentRole)))) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
         {toast && (
@@ -1332,7 +1344,7 @@ export default function App() {
             )}
 
             {/* STARTUP ROLE VIEW */}
-            {auth.role === 'STARTUP' && (
+            {getNormalizedRole(auth.role) === 'STARTUP' && (
               <div className="space-y-6">
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div>
@@ -1421,7 +1433,7 @@ export default function App() {
             )}
 
             {/* EXPERT ROLE VIEW */}
-            {auth.role === 'EXPERT' && (
+            {getNormalizedRole(auth.role) === 'EXPERT' && (
               <div className="space-y-6">
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                   <h2 className="text-2xl font-black text-slate-800">Expert Evaluation Board</h2>
@@ -1471,7 +1483,7 @@ export default function App() {
             )}
 
             {/* ADMIN ROLE VIEW */}
-            {auth.role === 'ADMIN' && (
+            {getNormalizedRole(auth.role) === 'ADMIN' && (
               <div className="space-y-6">
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                   <h2 className="text-2xl font-black text-slate-800">Admin Platform Dashboard</h2>
