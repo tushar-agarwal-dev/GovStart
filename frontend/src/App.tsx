@@ -431,8 +431,12 @@ export default function App() {
     return { status: 'SUCCESS', message: 'Demo Mode operation completed' };
   };
 
-  // Safe fetch helper with intelligent static host fallback
-  const apiFetch = async (url: string, options: RequestInit = {}) => {
+  // Base URL configuration for production backend (Render, Railway, etc.)
+  const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+
+  // Safe fetch helper with intelligent Render backend & static host fallback
+  const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
+    const fullUrl = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
     const headers = new Headers(options.headers || {});
     if (auth?.token) {
       headers.set('Authorization', `Bearer ${auth.token}`);
@@ -443,7 +447,7 @@ export default function App() {
 
     const config = { ...options, headers };
     try {
-      const response = await fetch(url, config);
+      const response = await fetch(fullUrl, config);
       if (response.status === 401 || response.status === 403) {
         handleLogout();
         showToast('Session expired. Please log in again.', 'error');
@@ -453,7 +457,7 @@ export default function App() {
         const errText = await response.text();
         // If InfinityFree or static host returned 404 HTML page, intercept seamlessly for demo mode
         if (response.status === 404 || errText.includes('InfinityFree') || errText.includes('404 Not Found')) {
-          return getStaticMockApiResponse(url, options);
+          return getStaticMockApiResponse(endpoint, options);
         }
         throw new Error(errText || 'Network request failed');
       }
@@ -463,7 +467,7 @@ export default function App() {
         throw e;
       }
       // On static web host network failure, return mock data instantly without showing red 404 toast
-      return getStaticMockApiResponse(url, options);
+      return getStaticMockApiResponse(endpoint, options);
     }
   };
 
