@@ -64,23 +64,23 @@ public class DatabaseSeeder implements CommandLineRunner {
         // 2. Seed/Verify core roles
         seedAdmin();
         DepartmentProfile dept = seedDepartment();
-        StartupProfile ecotech = seedStartup("Maha-EcoTech Solutions", "ecotech@startups.in", "StartupPass_GovStart_2026!",
+        StartupProfile ecotech = seedStartup("Maha-EcoTech Solutions", "ecotech@startups.in", "StartupPass_YuktiSetu_2026!",
                 "Advanced AI-enabled organic waste decomposers for community landfill management.",
                 "Waste Management", Arrays.asList("Waste Management", "Recycling", "AI", "AgriTech"), 12, 2024, "DPIIT-893021");
 
-        StartupProfile healthsetu = seedStartup("HealthSetu Platforms", "healthsetu@startups.in", "StartupPass_GovStart_2026!",
+        StartupProfile healthsetu = seedStartup("HealthSetu Platforms", "healthsetu@startups.in", "StartupPass_YuktiSetu_2026!",
                 "Telemedicine infrastructure connecting rural primary health centers with civil hospitals.",
                 "HealthTech", Arrays.asList("HealthTech", "Telemedicine", "IoT"), 25, 2023, "DPIIT-772183");
 
-        StartupProfile krishidron = seedStartup("KrishiDron Systems", "krishidron@startups.in", "StartupPass_GovStart_2026!",
+        StartupProfile krishidron = seedStartup("KrishiDron Systems", "krishidron@startups.in", "StartupPass_YuktiSetu_2026!",
                 "Drone-based multispectral imaging and local soil health forecasting algorithms.",
                 "AgriTech", Arrays.asList("AgriTech", "IoT", "Drone", "Analytics"), 8, 2025, "DPIIT-321102");
 
-        ExpertProfile kulkarni = seedExpert("Prof. Ravindra Kulkarni", "kulkarni@coep.ac.in", "ExpertPass_GovStart_2026!",
+        ExpertProfile kulkarni = seedExpert("Prof. Ravindra Kulkarni", "kulkarni@coep.ac.in", "ExpertPass_YuktiSetu_2026!",
                 "Environmental Science & Engineering", "Professor, COEP Tech University",
                 Arrays.asList("Waste Management", "Recycling", "Biotech"));
 
-        ExpertProfile deshmukh = seedExpert("Dr. Ananya Deshmukh", "deshmukh@vjti.ac.in", "ExpertPass_GovStart_2026!",
+        ExpertProfile deshmukh = seedExpert("Dr. Ananya Deshmukh", "deshmukh@vjti.ac.in", "ExpertPass_YuktiSetu_2026!",
                 "Digital Health & Communications", "Associate Professor, VJTI Mumbai",
                 Arrays.asList("HealthTech", "Telemedicine", "AI"));
 
@@ -296,11 +296,11 @@ public class DatabaseSeeder implements CommandLineRunner {
     }
 
     private void seedAdmin() {
-        if (!userRepository.existsByEmail("admin@govstart.gov.in")) {
+        if (!userRepository.existsByEmail("admin@yuktisetu.gov.in")) {
             User admin = User.builder()
                     .name("Super Admin")
-                    .email("admin@govstart.gov.in")
-                    .passwordHash(passwordEncoder.encode("AdminPass_GovStart_2026!"))
+                    .email("admin@yuktisetu.gov.in")
+                    .passwordHash(passwordEncoder.encode("AdminPass_YuktiSetu_2026!"))
                     .role(Role.ADMIN)
                     .status("ACTIVE")
                     .build();
@@ -310,17 +310,17 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private DepartmentProfile seedDepartment() {
         User deptUser;
-        if (!userRepository.existsByEmail("dept@govstart.gov.in")) {
+        if (!userRepository.existsByEmail("dept@yuktisetu.gov.in")) {
             deptUser = User.builder()
                     .name("Urban Development Nodal Nanded")
-                    .email("dept@govstart.gov.in")
-                    .passwordHash(passwordEncoder.encode("DeptPass_GovStart_2026!"))
+                    .email("dept@yuktisetu.gov.in")
+                    .passwordHash(passwordEncoder.encode("DeptPass_YuktiSetu_2026!"))
                     .role(Role.DEPARTMENT)
                     .status("ACTIVE")
                     .build();
             deptUser = userRepository.save(deptUser);
         } else {
-            deptUser = userRepository.findByEmail("dept@govstart.gov.in").orElse(null);
+            deptUser = userRepository.findByEmail("dept@yuktisetu.gov.in").orElse(null);
         }
 
         DepartmentProfile profile = departmentProfileRepository.findByUser(deptUser).orElse(null);
