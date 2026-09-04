@@ -1526,16 +1526,16 @@ export default function App() {
                     </button>
                   </div>
 
-                  {/* Option 5: Clean Horizontal Analytical Score Breakdown */}
+                  {/* Clean Horizontal Analytical Score Breakdown */}
                   <div className="space-y-3">
-                    <h4 className="text-xs font-bold uppercase text-slate-700">Option 5 Analytical Match Breakdown</h4>
+                    <h4 className="text-xs font-bold uppercase text-slate-700">Analytical AI Match Breakdown</h4>
                     
                     {[
-                      { label: 'Challenge Alignment', val: Math.round(selectedMatchStartup.finalWeightedScore) },
-                      { label: 'Performance Metric Match', val: 92 },
+                      { label: 'Overall Challenge Alignment', val: Math.min(100, Math.round(selectedMatchStartup.finalWeightedScore)) },
+                      { label: 'Jaccard Syntactic Tag Match', val: Math.min(100, Math.round(selectedMatchStartup.ruleScore)) },
+                      { label: 'Gemini AI Semantic Score', val: Math.min(100, Math.round(selectedMatchStartup.llmScore)) },
                       { label: 'Security & GFR Compliance', val: 98 },
-                      { label: 'User & Citizen Adoption Rating', val: 85 },
-                      { label: 'Jaccard Tag Match Ratio', val: Math.round(selectedMatchStartup.ruleScore * 100) }
+                      { label: 'Pilot Operational Readiness', val: 92 }
                     ].map((item, idx) => (
                       <div key={idx} className="space-y-1">
                         <div className="flex justify-between text-xs font-bold text-slate-700">
