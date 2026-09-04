@@ -161,12 +161,156 @@ interface AuditLog {
   checksum: string;
 }
 
+const translations = {
+  en: {
+    portalSubtitle: 'State Innovation & Procurement Platform',
+    badgeText: 'GOVERNMENT × STARTUP INNOVATION PLATFORM',
+    heroTitle: 'A Smarter Way for Government to',
+    heroTitleHighlight: 'Discover, Pilot & Scale',
+    heroTitleEnd: 'Innovation',
+    heroDesc: 'GovStart connects government departments with verified startups to solve real-world challenges — from defining measurable outcomes and AI-powered matching to running secure pilots and scaling proven solutions.',
+    exploreDemo: 'Explore Demo Workspace',
+    registerAccount: 'Register Account',
+    liveDemos: 'LIVE PERSONA DEMOS',
+    deptRole: '🏛️ Municipal Department',
+    startupRole: '🚀 Startup',
+    expertRole: '🎓 Expert',
+    adminRole: '🛡️ Administrator',
+    // Stats
+    stat1Label: 'Pilot Budget Managed',
+    stat2Label: 'Active Pilot Programs',
+    stat3Label: 'Startup Verification',
+    stat4Label: 'Audit Trail Coverage',
+    // Problem
+    problemBadge: 'THE PROCUREMENT BOTTLENECK',
+    problemTitle: "Traditional Public Procurement Wasn't Built for Fast-Moving Startups",
+    problem1Title: 'Locks Out Novel Solutions',
+    problem1Desc: 'Departments write specifications based on past technology rather than defining outcome-based performance goals.',
+    problem2Title: 'Risky & Delayed Trials',
+    problem2Desc: 'Lack of standardized sandbox mechanisms makes pilot trial deployment slow, uncertain, and high-risk.',
+    problem3Title: 'Proven Pilots Fail to Scale',
+    problem3Desc: 'Even successful pilot outcomes often stall without a direct pathway into state procurement catalogs.',
+    // 6-step workflow
+    howItWorks: 'HOW GOVSTART SOLVES IT',
+    workflowTitle: 'From Government Challenge to Scalable Solution',
+    workflowSub: 'A transparent, outcome-driven journey from problem identification to successful procurement.',
+    step1Title: 'Define Challenge',
+    step1Tag: 'OUTCOME GOALS',
+    step1Desc: 'Set measurable success criteria and KPI performance targets.',
+    step2Title: 'AI Matchmaking',
+    step2Tag: 'DISCOVERY',
+    step2Desc: 'Find and rank the most relevant startups using AI matching.',
+    step3Title: 'Expert Validation',
+    step3Tag: 'VETTING',
+    step3Desc: 'Evaluate technical feasibility and solution readiness.',
+    step4Title: 'Digital Contracting',
+    step4Tag: 'E-AGREEMENT',
+    step4Desc: 'Create secure agreements with defined pilot terms and NDA.',
+    step5Title: 'Run Pilot',
+    step5Tag: 'KPI TRACKING',
+    step5Desc: 'Track real-time KPIs and release milestone-based funds.',
+    step6Title: 'Scale Solution',
+    step6Tag: 'GEM CATALOGING',
+    step6Desc: 'Verified pilot results are packaged into a procurement-ready profile for GeM/state procurement.',
+    // Security
+    secBadge: 'PLATFORM SECURITY & AUDIT SAFEGUARDS',
+    sec1Title: 'SHA-256 Chained Transaction Audit Ledger',
+    sec1Desc: 'Every transaction state transition is cryptographically signed with a SHA-256 hash chained to the prior block, ensuring 100% auditability for state auditors.',
+    sec2Title: 'Client-Side IP Encryption Vault',
+    sec2Desc: 'Startups submit technical schematics with local AES-256 client encryption, storing hash keys to protect proprietary startup intellectual property.',
+    // Lifecycle steps
+    lcStep1: 'Challenge Posting',
+    lcStep2: 'AI Matchmaking',
+    lcStep3: 'Expert Vetting',
+    lcStep4: 'Contract Signing',
+    lcStep5: 'Active Pilot & KPIs',
+    lcStep6: 'GeM Procurement',
+    // Common
+    signIn: 'Sign In',
+    logOut: 'Log Out',
+    goWorkspace: 'Go to Workspace'
+  },
+  mr: {
+    portalSubtitle: 'राज्य नवनिर्मिती व खरेदी प्लॅटफॉर्म',
+    badgeText: 'शासन × स्टार्टअप नवनिर्मिती प्लॅटफॉर्म',
+    heroTitle: 'शासकीय आव्हानांचे',
+    heroTitleHighlight: 'शोध, पायलट आणि विस्तार',
+    heroTitleEnd: 'करण्याचा स्मार्ट मार्ग',
+    heroDesc: 'गोव्हस्टार्ट सरकारी विभागांना प्रमाणित स्टार्टअप्सशी जोडते — उद्दिष्टे ठरवणे, AI आधारित मॅचमेकिंग, सुरक्षित पायलट चाचण्या आणि यशस्वी उपायांचा विस्तार करणे.',
+    exploreDemo: 'डेमो वर्कस्पेस पहा',
+    registerAccount: 'खाते नोंदणी करा',
+    liveDemos: 'थेट अचूक व्यक्ती डेमो',
+    deptRole: '🏛️ महानगरपालिका विभाग',
+    startupRole: '🚀 स्टार्टअप',
+    expertRole: '🎓 तज्ज्ञ समिती',
+    adminRole: '🛡️ मुख्य प्रशासक',
+    // Stats
+    stat1Label: 'पायलट बजेट व्यवस्थापित',
+    stat2Label: 'सक्रिय पायलट कार्यक्रम',
+    stat3Label: 'DPIIT स्टार्टअप पडताळणी',
+    stat4Label: 'ऑडिट नोंदणी १००%',
+    // Problem
+    problemBadge: 'खरेदी प्रक्रियेतील अडचणी',
+    problemTitle: 'पारंपरिक सरकारी खरेदी प्रक्रिया नव्या स्टार्टअप्ससाठी पुरेशी ठरत नाही',
+    problem1Title: 'नवीन उपायांना अडथळा',
+    problem1Desc: 'सरकारी विभाग नवीन तंत्रज्ञानापेक्षा जुन्या तांत्रिक निकषांवर आधारित अटी तयार करतात.',
+    problem2Title: 'जोखीम व विलंबाच्या चाचण्या',
+    problem2Desc: 'प्रमाणित सँडबॉक्स चौकटीअभावी पायलट चाचण्या मंद व जोखमीच्या ठरतात.',
+    problem3Title: 'यशस्वी पायलट थांबतात',
+    problem3Desc: 'यशस्वी ठरलेले उपक्रम देखील पुढील सरकारी खरेदी सूचीमध्ये स्थान मिळवू शकत नाहीत.',
+    // 6-step workflow
+    howItWorks: 'गोव्हस्टार्ट उपायांचे टप्पे',
+    workflowTitle: 'शासकीय आव्हानापासून ते मोठ्या प्रमाणावर विस्तारापर्यंत',
+    workflowSub: 'समस्या ओळखीपासून ते यशस्वी खरेदीर्यंतचा पारदर्शक प्रवास.',
+    step1Title: '०१ - आव्हान निश्चित करा',
+    step1Tag: 'उद्दिष्टे',
+    step1Desc: 'मोजता येण्याजोगी उद्दिष्टे आणि KPI निकष ठरवा.',
+    step2Title: '०२ - AI मॅचमेकिंग',
+    step2Tag: 'शोध प्रणाली',
+    step2Desc: 'सर्वात योग्य स्टार्टअप्स शोधून त्यांची वर्गवारी करा.',
+    step3Title: '०३ - तज्ज्ञ मूल्यमापन',
+    step3Tag: 'पडताळणी',
+    step3Desc: 'तांत्रिक सुलभता आणि उपक्रमाची तयारी तपासा.',
+    step4Title: '०४ - डिजिटल करार',
+    step4Tag: 'ई-करार',
+    step4Desc: 'पायलट अटींसह सुरक्षित डिजिटल ई-करार करा.',
+    step5Title: '०५ - पायलट चाचणी',
+    step5Tag: 'KPI ट्रॅकिंग',
+    step5Desc: 'प्रगतीवर लक्ष ठेवा आणि टप्प्यानुसार निधी वितरित करा.',
+    step6Title: '०६ - व्यापक विस्तार',
+    step6Tag: 'GEM खरेदी',
+    step6Desc: 'प्रमाणित उपक्रम खरेदी-सज्ज स्वरूपात सादर करा.',
+    // Security
+    secBadge: 'सुरक्षा व ऑडिट संरक्षण',
+    sec1Title: 'SHA-256 साखळीबद्ध व्यवहार ऑडिट नोंद',
+    sec1Desc: 'प्रत्येक व्यवहार SHA-256 हॅशसह ब्लॉक साखळीद्वारे पारदर्शकपणे नोंदवला जातो.',
+    sec2Title: 'क्लायंट-साइड IP एनक्रिप्शन',
+    sec2Desc: 'स्टार्टअपचे तांत्रिक आलेख AES-256 द्वारे सुरक्षित ठेवून बौद्धिक संपदेचे रक्षण केले जाते.',
+    // Lifecycle steps
+    lcStep1: 'आव्हान नोंदणी',
+    lcStep2: 'AI मॅचमेकिंग',
+    lcStep3: 'तज्ज्ञ समिती',
+    lcStep4: 'करारावर सही',
+    lcStep5: 'पायलट चाचणी',
+    lcStep6: 'GeM खरेदी',
+    // Common
+    signIn: 'साइन इन करा',
+    logOut: 'बाहेर पडा',
+    goWorkspace: 'वर्कस्पेसवर जा'
+  }
+};
+
 export default function App() {
-  // Navigation & Auth
+  // Navigation & Auth & Language (EN / MR)
+  const [lang, setLang] = useState<'en' | 'mr'>('en');
   const [auth, setAuth] = useState<AuthState | null>(() => {
     const saved = localStorage.getItem('govstart_auth');
     return saved ? JSON.parse(saved) : null;
   });
+
+  const t = (key: keyof typeof translations['en']) => {
+    return translations[lang][key] || translations['en'][key] || key;
+  };
   const [view, setView] = useState<string>('landing');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
@@ -840,7 +984,15 @@ export default function App() {
             </div>
           </div>
 
-          <nav className="flex items-center gap-4">
+          <nav className="flex items-center gap-3">
+            {/* Language Switcher Toggle */}
+            <button 
+              onClick={() => setLang(lang === 'en' ? 'mr' : 'en')} 
+              className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 cursor-pointer flex items-center gap-1 transition-colors"
+              title="Change Language / भाषा बदला"
+            >
+              <span>🌐</span> {lang === 'en' ? 'मराठी' : 'English'}
+            </button>
             {auth ? (
               <div className="flex items-center gap-4">
                 {view !== 'dashboard' && (
@@ -897,16 +1049,16 @@ export default function App() {
               {/* Left Column: Headline, CTAs, Persona Fill */}
               <div className="lg:col-span-7 space-y-6 text-left">
                 <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 uppercase tracking-widest">
-                  <Award size={13} className="text-indigo-600" /> GOVERNMENT × STARTUP INNOVATION PLATFORM
+                  <Award size={13} className="text-indigo-600" /> {t('badgeText')}
                 </div>
                 
                 <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-[1.15]">
-                  A Smarter Way for Government to <br />
-                  <span className="text-indigo-600">Discover, Pilot & Scale</span> Innovation
+                  {t('heroTitle')} <br />
+                  <span className="text-indigo-600">{t('heroTitleHighlight')}</span> {t('heroTitleEnd')}
                 </h1>
                 
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-xl">
-                  GovStart connects government departments with verified startups to solve real-world challenges — from defining measurable outcomes and AI-powered matching to running secure pilots and scaling proven solutions.
+                  {t('heroDesc')}
                 </p>
                 
                 <div className="flex flex-wrap items-center gap-3 pt-1">
@@ -914,24 +1066,24 @@ export default function App() {
                     onClick={() => setView('login')} 
                     className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-3 rounded-xl text-xs flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
                   >
-                    Explore Demo Workspace <ArrowRight size={15} />
+                    {t('exploreDemo')} <ArrowRight size={15} />
                   </button>
                   <button 
                     onClick={() => setView('register')} 
                     className="bg-white hover:bg-slate-50 text-slate-800 font-bold border border-slate-200 px-6 py-3 rounded-xl text-xs cursor-pointer transition-colors"
                   >
-                    Register Account
+                    {t('registerAccount')}
                   </button>
                 </div>
 
                 {/* 1-Click Live Persona Demos Bar */}
                 <div className="pt-4 border-t border-slate-100 space-y-2">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">LIVE PERSONA DEMOS</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('liveDemos')}</p>
                   <div className="flex flex-wrap gap-2">
-                    <button onClick={() => { fillCredentials('dept'); setView('login'); }} className="text-[10px] font-semibold bg-white hover:bg-indigo-50 hover:border-indigo-200 border border-slate-200 py-1.5 px-3 rounded-lg cursor-pointer shadow-2xs">🏛️ Municipal Department</button>
-                    <button onClick={() => { fillCredentials('startup'); setView('login'); }} className="text-[10px] font-semibold bg-white hover:bg-indigo-50 hover:border-indigo-200 border border-slate-200 py-1.5 px-3 rounded-lg cursor-pointer shadow-2xs">🚀 Startup</button>
-                    <button onClick={() => { fillCredentials('expert'); setView('login'); }} className="text-[10px] font-semibold bg-white hover:bg-indigo-50 hover:border-indigo-200 border border-slate-200 py-1.5 px-3 rounded-lg cursor-pointer shadow-2xs">🎓 Expert</button>
-                    <button onClick={() => { fillCredentials('admin'); setView('login'); }} className="text-[10px] font-semibold bg-white hover:bg-indigo-50 hover:border-indigo-200 border border-slate-200 py-1.5 px-3 rounded-lg cursor-pointer shadow-2xs">🛡️ Administrator</button>
+                    <button onClick={() => { fillCredentials('dept'); setView('login'); }} className="text-[10px] font-semibold bg-white hover:bg-indigo-50 hover:border-indigo-200 border border-slate-200 py-1.5 px-3 rounded-lg cursor-pointer shadow-2xs">{t('deptRole')}</button>
+                    <button onClick={() => { fillCredentials('startup'); setView('login'); }} className="text-[10px] font-semibold bg-white hover:bg-indigo-50 hover:border-indigo-200 border border-slate-200 py-1.5 px-3 rounded-lg cursor-pointer shadow-2xs">{t('startupRole')}</button>
+                    <button onClick={() => { fillCredentials('expert'); setView('login'); }} className="text-[10px] font-semibold bg-white hover:bg-indigo-50 hover:border-indigo-200 border border-slate-200 py-1.5 px-3 rounded-lg cursor-pointer shadow-2xs">{t('expertRole')}</button>
+                    <button onClick={() => { fillCredentials('admin'); setView('login'); }} className="text-[10px] font-semibold bg-white hover:bg-indigo-50 hover:border-indigo-200 border border-slate-200 py-1.5 px-3 rounded-lg cursor-pointer shadow-2xs">{t('adminRole')}</button>
                   </div>
                 </div>
               </div>
@@ -956,12 +1108,12 @@ export default function App() {
                   <div className="p-4 space-y-3 bg-slate-900">
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700 space-y-1">
-                        <span className="text-[9px] font-bold text-slate-400 uppercase">Active Programs</span>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase">{t('stat2Label')}</span>
                         <div className="text-xl font-black text-white">4 Pilots</div>
                         <span className="text-[9px] text-indigo-400 font-semibold">Running Sandbox</span>
                       </div>
                       <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700 space-y-1">
-                        <span className="text-[9px] font-bold text-slate-400 uppercase">Pilot Budget Managed</span>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase">{t('stat1Label')}</span>
                         <div className="text-xl font-black text-emerald-400">₹45.2L</div>
                         <span className="text-[9px] text-slate-400 font-semibold">Escrow Vetted</span>
                       </div>
@@ -970,14 +1122,14 @@ export default function App() {
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/80 flex items-center justify-between">
                         <div>
-                          <span className="text-[9px] font-bold text-slate-400 block">Audit Coverage</span>
+                          <span className="text-[9px] font-bold text-slate-400 block">{t('stat4Label')}</span>
                           <span className="font-black text-emerald-400 text-xs">100%</span>
                         </div>
                         <span className="text-[9px] text-emerald-400 font-bold">✓ SHA-256</span>
                       </div>
                       <div className="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/80 flex items-center justify-between">
                         <div>
-                          <span className="text-[9px] font-bold text-slate-400 block">DPIIT Lookup</span>
+                          <span className="text-[9px] font-bold text-slate-400 block">{t('stat3Label')}</span>
                           <span className="font-black text-indigo-400 text-xs">Verified</span>
                         </div>
                         <span className="text-[9px] text-indigo-400 font-bold">API</span>
@@ -1008,7 +1160,7 @@ export default function App() {
                 </div>
                 <div className="space-y-0.5">
                   <span className="text-base font-black text-slate-900 block leading-none">₹45L+</span>
-                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">Pilot Budget Managed</span>
+                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">{t('stat1Label')}</span>
                   <span className="text-[9px] text-slate-500 block">Escrow budget allocation</span>
                 </div>
               </div>
@@ -1019,7 +1171,7 @@ export default function App() {
                 </div>
                 <div className="space-y-0.5">
                   <span className="text-base font-black text-slate-900 block leading-none">4</span>
-                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">Active Pilot Programs</span>
+                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">{t('stat2Label')}</span>
                   <span className="text-[9px] text-slate-500 block">Running across departments</span>
                 </div>
               </div>
@@ -1030,7 +1182,7 @@ export default function App() {
                 </div>
                 <div className="space-y-0.5">
                   <span className="text-base font-black text-slate-900 block leading-none">DPIIT</span>
-                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">Startup Verification</span>
+                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">{t('stat3Label')}</span>
                   <span className="text-[9px] text-slate-500 block">Real-time registry check</span>
                 </div>
               </div>
@@ -1041,7 +1193,7 @@ export default function App() {
                 </div>
                 <div className="space-y-0.5">
                   <span className="text-base font-black text-slate-900 block leading-none">100%</span>
-                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">Audit Trail Coverage</span>
+                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">{t('stat4Label')}</span>
                   <span className="text-[9px] text-slate-500 block">SHA-256 chained logs</span>
                 </div>
               </div>
@@ -1050,26 +1202,26 @@ export default function App() {
             {/* Storytelling Section 1: The Core Procurement Problem */}
             <div className="bg-slate-900 text-white p-8 rounded-2xl border border-slate-800 shadow-xs space-y-6">
               <div className="space-y-1 text-center sm:text-left">
-                <span className="text-[10px] font-mono text-indigo-400 font-bold uppercase tracking-widest">THE PROCUREMENT BOTTLENECK</span>
-                <h2 className="text-2xl sm:text-3xl font-black text-white">Traditional Public Procurement Wasn't Built for Fast-Moving Startups</h2>
+                <span className="text-[10px] font-mono text-indigo-400 font-bold uppercase tracking-widest">{t('problemBadge')}</span>
+                <h2 className="text-2xl sm:text-3xl font-black text-white">{t('problemTitle')}</h2>
                 <p className="text-xs text-slate-400 max-w-2xl">Why innovative solutions struggle to enter public sector deployment.</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                 <div className="p-4 rounded-xl bg-slate-800/80 border border-slate-700 space-y-1.5">
-                  <span className="text-indigo-400 font-extrabold text-xs block">01 &bull; Rigid Technical Specs</span>
-                  <h4 className="font-extrabold text-slate-100">Locks Out Novel Solutions</h4>
-                  <p className="text-slate-400 text-[11px] leading-relaxed">Departments write specifications based on past technology rather than defining outcome-based performance goals.</p>
+                  <span className="text-indigo-400 font-extrabold text-xs block">01 &bull; {t('problem1Title')}</span>
+                  <h4 className="font-extrabold text-slate-100">{t('problem1Title')}</h4>
+                  <p className="text-slate-400 text-[11px] leading-relaxed">{t('problem1Desc')}</p>
                 </div>
                 <div className="p-4 rounded-xl bg-slate-800/80 border border-slate-700 space-y-1.5">
-                  <span className="text-indigo-400 font-extrabold text-xs block">02 &bull; High Pilot Friction</span>
-                  <h4 className="font-extrabold text-slate-900 text-slate-100">Risky & Delayed Trials</h4>
-                  <p className="text-slate-400 text-[11px] leading-relaxed">Lack of standardized sandbox mechanisms makes pilot trial deployment slow, uncertain, and high-risk.</p>
+                  <span className="text-indigo-400 font-extrabold text-xs block">02 &bull; {t('problem2Title')}</span>
+                  <h4 className="font-extrabold text-slate-100">{t('problem2Title')}</h4>
+                  <p className="text-slate-400 text-[11px] leading-relaxed">{t('problem2Desc')}</p>
                 </div>
                 <div className="p-4 rounded-xl bg-slate-800/80 border border-slate-700 space-y-1.5">
-                  <span className="text-indigo-400 font-extrabold text-xs block">03 &bull; Scaling Dead-Ends</span>
-                  <h4 className="font-extrabold text-slate-100">Proven Pilots Fail to Scale</h4>
-                  <p className="text-slate-400 text-[11px] leading-relaxed">Even successful pilot outcomes often stall without a direct pathway into state procurement catalogs.</p>
+                  <span className="text-indigo-400 font-extrabold text-xs block">03 &bull; {t('problem3Title')}</span>
+                  <h4 className="font-extrabold text-slate-100">{t('problem3Title')}</h4>
+                  <p className="text-slate-400 text-[11px] leading-relaxed">{t('problem3Desc')}</p>
                 </div>
               </div>
             </div>
@@ -1077,19 +1229,19 @@ export default function App() {
             {/* Storytelling Section 2: 6-Step Workflow */}
             <div className="space-y-4 text-center">
               <div>
-                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">HOW GOVSTART SOLVES IT</span>
-                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">From Government Challenge to Scalable Solution</h2>
-                <p className="text-xs text-slate-500 mt-1 max-w-xl mx-auto">A transparent, outcome-driven journey from problem identification to successful procurement.</p>
+                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">{t('howItWorks')}</span>
+                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">{t('workflowTitle')}</h2>
+                <p className="text-xs text-slate-500 mt-1 max-w-xl mx-auto">{t('workflowSub')}</p>
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 text-left">
                 {[
-                  { step: '01', title: 'Define Challenge', tag: 'OUTCOME GOALS', desc: 'Set measurable success criteria and KPI performance targets.' },
-                  { step: '02', title: 'AI Matchmaking', tag: 'DISCOVERY', desc: 'Find and rank the most relevant startups using AI matching.' },
-                  { step: '03', title: 'Expert Validation', tag: 'VETTING', desc: 'Evaluate technical feasibility and solution readiness.' },
-                  { step: '04', title: 'Digital Contracting', tag: 'E-AGREEMENT', desc: 'Create secure agreements with defined pilot terms and NDA.' },
-                  { step: '05', title: 'Run Pilot', tag: 'KPI TRACKING', desc: 'Track real-time KPIs and release milestone-based funds.' },
-                  { step: '06', title: 'Scale Solution', tag: 'GEM CATALOGING', desc: 'Verified pilot results are packaged into a procurement-ready profile for GeM/state procurement.' }
+                  { step: '01', title: t('step1Title'), tag: t('step1Tag'), desc: t('step1Desc') },
+                  { step: '02', title: t('step2Title'), tag: t('step2Tag'), desc: t('step2Desc') },
+                  { step: '03', title: t('step3Title'), tag: t('step3Tag'), desc: t('step3Desc') },
+                  { step: '04', title: t('step4Title'), tag: t('step4Tag'), desc: t('step4Desc') },
+                  { step: '05', title: t('step5Title'), tag: t('step5Tag'), desc: t('step5Desc') },
+                  { step: '06', title: t('step6Title'), tag: t('step6Tag'), desc: t('step6Desc') }
                 ].map(item => (
                   <div key={item.step} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-2 flex flex-col justify-between">
                     <div className="space-y-2">
@@ -1108,7 +1260,7 @@ export default function App() {
             {/* Platform Security & Governance Features */}
             <div className="space-y-4">
               <div className="text-center">
-                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest font-sans">PLATFORM SECURITY & AUDIT SAFEGUARDS</span>
+                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest font-sans">{t('secBadge')}</span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex items-start gap-4">
@@ -1116,8 +1268,8 @@ export default function App() {
                     <ShieldCheck size={24} />
                   </div>
                   <div className="space-y-1">
-                    <h4 className="font-bold text-slate-900 text-xs">SHA-256 Chained Transaction Audit Ledger</h4>
-                    <p className="text-slate-500 text-[11px] leading-relaxed">Every transaction state transition is cryptographically signed with a SHA-256 hash chained to the prior block, ensuring 100% auditability for state auditors.</p>
+                    <h4 className="font-bold text-slate-900 text-xs">{t('sec1Title')}</h4>
+                    <p className="text-slate-500 text-[11px] leading-relaxed">{t('sec1Desc')}</p>
                   </div>
                 </div>
 
@@ -1126,8 +1278,8 @@ export default function App() {
                     <Cpu size={24} />
                   </div>
                   <div className="space-y-1">
-                    <h4 className="font-bold text-slate-900 text-xs">Client-Side IP Encryption Vault</h4>
-                    <p className="text-slate-500 text-[11px] leading-relaxed">Startups submit technical schematics with local AES-256 client encryption, storing hash keys to protect proprietary startup intellectual property.</p>
+                    <h4 className="font-bold text-slate-900 text-xs">{t('sec2Title')}</h4>
+                    <p className="text-slate-500 text-[11px] leading-relaxed">{t('sec2Desc')}</p>
                   </div>
                 </div>
               </div>
