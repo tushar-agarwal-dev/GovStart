@@ -887,122 +887,233 @@ export default function App() {
       {/* Main Content Area */}
       <main className="flex-grow max-w-7xl w-full mx-auto p-6 space-y-6">
         
-        {/* LANDING PAGE REDESIGN */}
+        {/* LANDING PAGE REDESIGN MATCHING SIH DEMO BEST PRACTICES */}
         {view === 'landing' && (
-          <div className="py-4 space-y-8 max-w-6xl mx-auto">
+          <div className="py-4 space-y-12 max-w-6xl mx-auto">
             
-            {/* Hero Section */}
-            <div className="bg-white p-8 sm:p-10 rounded-2xl border border-slate-200 shadow-xs space-y-6 text-center">
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 uppercase tracking-wider">
-                <Award size={14} className="text-indigo-600" /> State Public Procurement & Innovation Exemption Framework
-              </div>
+            {/* Split Hero Section with Interactive Live App Preview */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2">
               
-              <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
-                Direct Sandbox Procurement for <br className="hidden sm:block" />
-                <span className="text-indigo-600">High-Impact Innovators</span>
-              </h1>
-              
-              <p className="text-xs sm:text-sm text-slate-600 max-w-3xl mx-auto leading-relaxed">
-                GovStart empowers municipal and state government departments to define outcome goals, run explainable AI startup matching, execute digital stamp contracts, lock escrow pilot budgets, and catalog certified outcomes to the GeM Portal.
-              </p>
-              
-              <div className="flex flex-wrap justify-center gap-4 pt-2">
-                <button 
-                  onClick={() => setView('login')} 
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-7 py-3 rounded-xl text-xs flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
-                >
-                  Explore Demo Workspace <ArrowRight size={16} />
-                </button>
-                <button 
-                  onClick={() => setView('register')} 
-                  className="bg-white hover:bg-slate-50 text-slate-800 font-bold border border-slate-300 px-7 py-3 rounded-xl text-xs cursor-pointer transition-colors"
-                >
-                  Register Account
-                </button>
+              {/* Left Column: Headline, CTAs, Persona Fill */}
+              <div className="lg:col-span-7 space-y-6 text-left">
+                <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 uppercase tracking-widest">
+                  <Award size={13} className="text-indigo-600" /> GOVERNMENT × STARTUP INNOVATION PLATFORM
+                </div>
+                
+                <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-[1.15]">
+                  A Smarter Way for Government to <br />
+                  <span className="text-indigo-600">Discover, Pilot & Scale</span> Innovation
+                </h1>
+                
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-xl">
+                  GovStart connects government departments with verified startups to solve real-world challenges — from defining measurable outcomes and AI-powered matching to running secure pilots and scaling proven solutions.
+                </p>
+                
+                <div className="flex flex-wrap items-center gap-3 pt-1">
+                  <button 
+                    onClick={() => setView('login')} 
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-3 rounded-xl text-xs flex items-center gap-2 cursor-pointer transition-colors shadow-xs"
+                  >
+                    Explore Demo Workspace <ArrowRight size={15} />
+                  </button>
+                  <button 
+                    onClick={() => setView('register')} 
+                    className="bg-white hover:bg-slate-50 text-slate-800 font-bold border border-slate-200 px-6 py-3 rounded-xl text-xs cursor-pointer transition-colors"
+                  >
+                    Register Account
+                  </button>
+                </div>
+
+                {/* 1-Click Live Persona Demos Bar */}
+                <div className="pt-4 border-t border-slate-100 space-y-2">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">LIVE PERSONA DEMOS</p>
+                  <div className="flex flex-wrap gap-2">
+                    <button onClick={() => { fillCredentials('dept'); setView('login'); }} className="text-[10px] font-semibold bg-white hover:bg-indigo-50 hover:border-indigo-200 border border-slate-200 py-1.5 px-3 rounded-lg cursor-pointer shadow-2xs">🏛️ Municipal Department</button>
+                    <button onClick={() => { fillCredentials('startup'); setView('login'); }} className="text-[10px] font-semibold bg-white hover:bg-indigo-50 hover:border-indigo-200 border border-slate-200 py-1.5 px-3 rounded-lg cursor-pointer shadow-2xs">🚀 Startup</button>
+                    <button onClick={() => { fillCredentials('expert'); setView('login'); }} className="text-[10px] font-semibold bg-white hover:bg-indigo-50 hover:border-indigo-200 border border-slate-200 py-1.5 px-3 rounded-lg cursor-pointer shadow-2xs">🎓 Expert</button>
+                    <button onClick={() => { fillCredentials('admin'); setView('login'); }} className="text-[10px] font-semibold bg-white hover:bg-indigo-50 hover:border-indigo-200 border border-slate-200 py-1.5 px-3 rounded-lg cursor-pointer shadow-2xs">🛡️ Administrator</button>
+                  </div>
+                </div>
               </div>
 
-              {/* Quick Persona Demo Auto-Fill Shortcuts */}
-              <div className="pt-6 border-t border-slate-100">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">1-Click Live Persona Demos</p>
-                <div className="flex flex-wrap justify-center gap-2">
-                  <button onClick={() => { fillCredentials('dept'); setView('login'); }} className="text-[11px] font-semibold bg-slate-50 hover:bg-indigo-50 hover:border-indigo-200 border border-slate-200 py-1.5 px-3 rounded-lg cursor-pointer">🏛️ Municipal Dept</button>
-                  <button onClick={() => { fillCredentials('startup'); setView('login'); }} className="text-[11px] font-semibold bg-slate-50 hover:bg-indigo-50 hover:border-indigo-200 border border-slate-200 py-1.5 px-3 rounded-lg cursor-pointer">🚀 EcoTech Startup</button>
-                  <button onClick={() => { fillCredentials('expert'); setView('login'); }} className="text-[11px] font-semibold bg-slate-50 hover:bg-indigo-50 hover:border-indigo-200 border border-slate-200 py-1.5 px-3 rounded-lg cursor-pointer">🎓 Academic Expert</button>
-                  <button onClick={() => { fillCredentials('admin'); setView('login'); }} className="text-[11px] font-semibold bg-slate-50 hover:bg-indigo-50 hover:border-indigo-200 border border-slate-200 py-1.5 px-3 rounded-lg cursor-pointer">🛡️ Super Admin</button>
+              {/* Right Column: Floating Interactive App Preview Window */}
+              <div className="lg:col-span-5">
+                <div className="bg-slate-900 rounded-2xl border border-slate-800 shadow-xl overflow-hidden text-white text-xs">
+                  {/* Top Mock Window Header Bar */}
+                  <div className="bg-slate-950 px-4 py-2.5 flex items-center justify-between border-b border-slate-800">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-red-500/80 inline-block" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
+                      <span className="font-mono text-[10px] text-slate-400 font-bold ml-2">GovStart Sandbox Workspace</span>
+                    </div>
+                    <span className="text-[9px] bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded border border-emerald-500/30 uppercase">
+                      ● Active
+                    </span>
+                  </div>
+
+                  {/* Body Content Preview */}
+                  <div className="p-4 space-y-3 bg-slate-900">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700 space-y-1">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase">Active Programs</span>
+                        <div className="text-xl font-black text-white">4 Pilots</div>
+                        <span className="text-[9px] text-indigo-400 font-semibold">Running Sandbox</span>
+                      </div>
+                      <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700 space-y-1">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase">Pilot Budget Managed</span>
+                        <div className="text-xl font-black text-emerald-400">₹45.2L</div>
+                        <span className="text-[9px] text-slate-400 font-semibold">Escrow Vetted</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/80 flex items-center justify-between">
+                        <div>
+                          <span className="text-[9px] font-bold text-slate-400 block">Audit Coverage</span>
+                          <span className="font-black text-emerald-400 text-xs">100%</span>
+                        </div>
+                        <span className="text-[9px] text-emerald-400 font-bold">✓ SHA-256</span>
+                      </div>
+                      <div className="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/80 flex items-center justify-between">
+                        <div>
+                          <span className="text-[9px] font-bold text-slate-400 block">DPIIT Lookup</span>
+                          <span className="font-black text-indigo-400 text-xs">Verified</span>
+                        </div>
+                        <span className="text-[9px] text-indigo-400 font-bold">API</span>
+                      </div>
+                    </div>
+
+                    <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 space-y-1.5">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase">Recent Pilot Milestone</span>
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="text-slate-300">Smart Waste Sorter Pilot</span>
+                        <span className="text-emerald-400 font-mono">2h ago</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="text-slate-300">Rural Telemedicine Platform</span>
+                        <span className="text-indigo-400 font-mono">5h ago</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* High-Impact Institutional Metrics Banner */}
+            {/* Defensible Stats Banner */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-white p-5 rounded-xl border border-slate-200 text-center space-y-1">
-                <span className="text-2xl font-black text-indigo-600">₹45 Lakhs+</span>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Escrow Budget Vetted</p>
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold shrink-0">
+                  ₹
+                </div>
+                <div className="space-y-0.5">
+                  <span className="text-base font-black text-slate-900 block leading-none">₹45L+</span>
+                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">Pilot Budget Managed</span>
+                  <span className="text-[9px] text-slate-500 block">Escrow budget allocation</span>
+                </div>
               </div>
-              <div className="bg-white p-5 rounded-xl border border-slate-200 text-center space-y-1">
-                <span className="text-2xl font-black text-slate-900">4 Active</span>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Sandbox Pilots Running</p>
+
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold shrink-0">
+                  🚀
+                </div>
+                <div className="space-y-0.5">
+                  <span className="text-base font-black text-slate-900 block leading-none">4</span>
+                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">Active Pilot Programs</span>
+                  <span className="text-[9px] text-slate-500 block">Running across departments</span>
+                </div>
               </div>
-              <div className="bg-white p-5 rounded-xl border border-slate-200 text-center space-y-1">
-                <span className="text-2xl font-black text-slate-900">DPIIT Live Lookup</span>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Startup Registry API</p>
+
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold shrink-0">
+                  <Cpu size={18} />
+                </div>
+                <div className="space-y-0.5">
+                  <span className="text-base font-black text-slate-900 block leading-none">DPIIT</span>
+                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">Startup Verification</span>
+                  <span className="text-[9px] text-slate-500 block">Real-time registry check</span>
+                </div>
               </div>
-              <div className="bg-white p-5 rounded-xl border border-slate-200 text-center space-y-1">
-                <span className="text-2xl font-black text-emerald-600">100% GFR</span>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Audit Compliance</p>
+
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold shrink-0">
+                  <CheckCircle size={18} />
+                </div>
+                <div className="space-y-0.5">
+                  <span className="text-base font-black text-slate-900 block leading-none">100%</span>
+                  <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">Audit Trail Coverage</span>
+                  <span className="text-[9px] text-slate-500 block">SHA-256 chained logs</span>
+                </div>
               </div>
             </div>
 
-            {/* 6-Step Interactive Procurement Pathway Diagram */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-              <div className="border-b border-slate-100 pb-3">
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">6-Step Institutional Exemption Pathway</h3>
-                <p className="text-xs text-slate-500 mt-0.5">End-to-end workflow from challenge definition to GeM Portal marketplace scaling.</p>
+            {/* Storytelling Section 1: The Core Procurement Problem */}
+            <div className="bg-slate-900 text-white p-8 rounded-2xl border border-slate-800 shadow-xs space-y-6">
+              <div className="space-y-1 text-center sm:text-left">
+                <span className="text-[10px] font-mono text-indigo-400 font-bold uppercase tracking-widest">THE PROCUREMENT BOTTLENECK</span>
+                <h2 className="text-2xl sm:text-3xl font-black text-white">Traditional Public Procurement Wasn't Built for Fast-Moving Startups</h2>
+                <p className="text-xs text-slate-400 max-w-2xl">Why innovative solutions struggle to enter public sector deployment.</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div className="p-4 rounded-xl bg-slate-800/80 border border-slate-700 space-y-1.5">
+                  <span className="text-indigo-400 font-extrabold text-xs block">01 &bull; Rigid Technical Specs</span>
+                  <h4 className="font-extrabold text-slate-100">Locks Out Novel Solutions</h4>
+                  <p className="text-slate-400 text-[11px] leading-relaxed">Departments write specifications based on past technology rather than defining outcome-based performance goals.</p>
+                </div>
+                <div className="p-4 rounded-xl bg-slate-800/80 border border-slate-700 space-y-1.5">
+                  <span className="text-indigo-400 font-extrabold text-xs block">02 &bull; High Pilot Friction</span>
+                  <h4 className="font-extrabold text-slate-900 text-slate-100">Risky & Delayed Trials</h4>
+                  <p className="text-slate-400 text-[11px] leading-relaxed">Lack of standardized sandbox mechanisms makes pilot trial deployment slow, uncertain, and high-risk.</p>
+                </div>
+                <div className="p-4 rounded-xl bg-slate-800/80 border border-slate-700 space-y-1.5">
+                  <span className="text-indigo-400 font-extrabold text-xs block">03 &bull; Scaling Dead-Ends</span>
+                  <h4 className="font-extrabold text-slate-100">Proven Pilots Fail to Scale</h4>
+                  <p className="text-slate-400 text-[11px] leading-relaxed">Even successful pilot outcomes often stall without a direct pathway into state procurement catalogs.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Storytelling Section 2: 6-Step Workflow */}
+            <div className="space-y-4 text-center">
+              <div>
+                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">HOW GOVSTART SOLVES IT</span>
+                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">From Government Challenge to Scalable Solution</h2>
+                <p className="text-xs text-slate-500 mt-1 max-w-xl mx-auto">A transparent, outcome-driven journey from problem identification to successful procurement.</p>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
-                  <span className="text-[10px] font-extrabold text-indigo-600 uppercase">Step 1 &bull; Challenge Posting</span>
-                  <h4 className="font-extrabold text-slate-900">Outcome Goal Definition</h4>
-                  <p className="text-slate-500 text-[11px]">Nodal officers define measurable success criteria and KPI targets rather than rigid hardware specs.</p>
-                </div>
-                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
-                  <span className="text-[10px] font-extrabold text-indigo-600 uppercase">Step 2 &bull; AI Matchmaking</span>
-                  <h4 className="font-extrabold text-slate-900">Dual-Engine Discovery</h4>
-                  <p className="text-slate-500 text-[11px]">Syntactic Jaccard tag match + Gemini 1.5 Flash AI semantic score with DPIIT verification bonus.</p>
-                </div>
-                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
-                  <span className="text-[10px] font-extrabold text-indigo-600 uppercase">Step 3 &bull; Expert Vetting</span>
-                  <h4 className="font-extrabold text-slate-900">Academic Scorecards</h4>
-                  <p className="text-slate-500 text-[11px]">University professors (COEP/VJTI) execute quantitative technical feasibility scorecards.</p>
-                </div>
-                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
-                  <span className="text-[10px] font-extrabold text-indigo-600 uppercase">Step 4 &bull; Legal Signing</span>
-                  <h4 className="font-extrabold text-slate-900">E-Signature Stamp Agreements</h4>
-                  <p className="text-slate-500 text-[11px]">Dual e-signature stamp paper agreements with mutual NDA and IP protection clauses.</p>
-                </div>
-                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
-                  <span className="text-[10px] font-extrabold text-indigo-600 uppercase">Step 5 &bull; Active Sandbox</span>
-                  <h4 className="font-extrabold text-slate-900">Milestone Escrow Payouts</h4>
-                  <p className="text-slate-500 text-[11px]">Real-time KPI performance measurement with milestone-linked escrow tranches (25%, 35%, 40%).</p>
-                </div>
-                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1.5">
-                  <span className="text-[10px] font-extrabold text-indigo-600 uppercase">Step 6 &bull; GeM Cataloging</span>
-                  <h4 className="font-extrabold text-slate-900">State-Wide Procurement</h4>
-                  <p className="text-slate-500 text-[11px]">Certified sandbox outcomes published directly to the GeM Portal Marketplace for state scale-up.</p>
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 text-left">
+                {[
+                  { step: '01', title: 'Define Challenge', tag: 'OUTCOME GOALS', desc: 'Set measurable success criteria and KPI performance targets.' },
+                  { step: '02', title: 'AI Matchmaking', tag: 'DISCOVERY', desc: 'Find and rank the most relevant startups using AI matching.' },
+                  { step: '03', title: 'Expert Validation', tag: 'VETTING', desc: 'Evaluate technical feasibility and solution readiness.' },
+                  { step: '04', title: 'Digital Contracting', tag: 'E-AGREEMENT', desc: 'Create secure agreements with defined pilot terms and NDA.' },
+                  { step: '05', title: 'Run Pilot', tag: 'KPI TRACKING', desc: 'Track real-time KPIs and release milestone-based funds.' },
+                  { step: '06', title: 'Scale Solution', tag: 'GEM CATALOGING', desc: 'Verified pilot results are packaged into a procurement-ready profile for GeM/state procurement.' }
+                ].map(item => (
+                  <div key={item.step} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-2 flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <div className="w-6 h-6 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-[10px]">
+                        {item.step}
+                      </div>
+                      <span className="text-[8px] font-extrabold text-indigo-600 uppercase tracking-wider block">{item.tag}</span>
+                      <h4 className="font-extrabold text-slate-900 text-xs leading-snug">{item.title}</h4>
+                      <p className="text-[10px] text-slate-500 leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Platform Security & Governance Features */}
             <div className="space-y-4">
-              <div className="border-b border-slate-200 pb-2">
-                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Platform Security & Audit Safeguards</h3>
+              <div className="text-center">
+                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest font-sans">PLATFORM SECURITY & AUDIT SAFEGUARDS</span>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white p-5 rounded-xl border border-slate-200 flex items-start gap-4">
-                  <div className="p-2.5 bg-slate-100 text-slate-800 rounded-lg shrink-0">
-                    <Cpu size={20} />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 font-bold">
+                    <ShieldCheck size={24} />
                   </div>
                   <div className="space-y-1">
                     <h4 className="font-bold text-slate-900 text-xs">SHA-256 Chained Transaction Audit Ledger</h4>
@@ -1010,9 +1121,9 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="bg-white p-5 rounded-xl border border-slate-200 flex items-start gap-4">
-                  <div className="p-2.5 bg-slate-100 text-slate-800 rounded-lg shrink-0">
-                    <ShieldCheck size={20} />
+                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 font-bold">
+                    <Cpu size={24} />
                   </div>
                   <div className="space-y-1">
                     <h4 className="font-bold text-slate-900 text-xs">Client-Side IP Encryption Vault</h4>
