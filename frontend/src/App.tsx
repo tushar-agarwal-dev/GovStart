@@ -134,12 +134,23 @@ interface AuditLog {
 }
 
 export default function App() {
-  // Navigation & Auth
+  // Navigation & Auth (Defaults to active demo session for instant Vercel link viewing)
   const [auth, setAuth] = useState<AuthState | null>(() => {
     const saved = localStorage.getItem('yuktisetu_auth');
-    return saved ? JSON.parse(saved) : null;
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {}
+    }
+    return {
+      token: 'demo_token_default_dept',
+      email: 'dept@yuktisetu.gov.in',
+      role: 'DEPARTMENT',
+      userId: 1,
+      name: 'Urban Development Dept'
+    };
   });
-  const [view, setView] = useState<string>('landing');
+  const [view, setView] = useState<string>('dashboard');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // Forms
