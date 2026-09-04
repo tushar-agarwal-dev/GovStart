@@ -36,18 +36,6 @@ public class PilotUpdate {
     @Column(name = "submitted_at", nullable = false)
     private LocalDateTime submittedAt;
 
-    // Extended KPI measurements & Independent Validation fields
-    @Column(name = "kpi_measurements_json", columnDefinition = "TEXT")
-    private String kpiMeasurementsJson;
-    @Column(name = "evidence_ref")
-    private String evidenceRef;
-    @Column(name = "validation_status")
-    private String validationStatus; // PENDING, UNDER_REVIEW, VALIDATED, REJECTED
-    @Column(name = "validator_comments", columnDefinition = "TEXT")
-    private String validatorComments;
-    @Column(name = "validated_at")
-    private LocalDateTime validatedAt;
-
     public PilotUpdate() {}
 
     public PilotUpdate(Pilot pilot, Integer progressPercent, String notes, String milestoneName, String status, String attachmentName, String attachmentHash) {
@@ -87,17 +75,6 @@ public class PilotUpdate {
     public void setAttachmentHash(String attachmentHash) { this.attachmentHash = attachmentHash; }
     public LocalDateTime getSubmittedAt() { return submittedAt; }
     public void setSubmittedAt(LocalDateTime submittedAt) { this.submittedAt = submittedAt; }
-
-    public String getKpiMeasurementsJson() { return kpiMeasurementsJson; }
-    public void setKpiMeasurementsJson(String kpiMeasurementsJson) { this.kpiMeasurementsJson = kpiMeasurementsJson; }
-    public String getEvidenceRef() { return evidenceRef; }
-    public void setEvidenceRef(String evidenceRef) { this.evidenceRef = evidenceRef; }
-    public String getValidationStatus() { return validationStatus; }
-    public void setValidationStatus(String validationStatus) { this.validationStatus = validationStatus; }
-    public String getValidatorComments() { return validatorComments; }
-    public void setValidatorComments(String validatorComments) { this.validatorComments = validatorComments; }
-    public LocalDateTime getValidatedAt() { return validatedAt; }
-    public void setValidatedAt(LocalDateTime validatedAt) { this.validatedAt = validatedAt; }
 
     // Builder
     public static Builder builder() { return new Builder(); }

@@ -280,50 +280,6 @@ public class PilotService {
         return update;
     }
 
-    @Transactional
-    public Pilot signContract(Long userId, Long pilotId, String partyRole, String contractTermsJson) {
-        Pilot pilot = pilotRepository.findById(pilotId)
-                .orElseThrow(() -> new IllegalArgumentException("Pilot not found"));
-
-        if (contractTermsJson != null && !contractTermsJson.isBlank()) {
-            pilot.setContractTermsJson(contractTermsJson);
-        }
-
-        if ("DEPARTMENT".equalsIgnoreCase(partyRole)) {
-            pilot.setDeptSigned(true);
-        } else if ("STARTUP".equalsIgnoreCase(partyRole)) {
-            pilot.setStartupSigned(true);
-        }
-
-        if (Boolean.TRUE.equals(pilot.getDeptSigned()) && Boolean.TRUE.equals(pilot.getStartupSigned())) {
-            pilot.setSignedAt(LocalDateTime.now());
-            if ("CONTRACT_PENDING".equals(pilot.getStatus()) || "PILOT_ACTIVE".equals(pilot.getStatus())) {
-                pilot.setStatus("CONTRACT_SIGNED");
-            }
-        }
-
-        return pilotRepository.save(pilot);
-    }
-
-    @Transactional
-    public PilotUpdate validateMilestone(Long updateId, String validatorName, String validationStatus, String validatorComments) {
-        PilotUpdate update = pilotUpdateRepository.findById(updateId)
-                .orElseThrow(() -> new IllegalArgumentException("Milestone update not found"));
-
-        update.setValidatorComments(validatorComments);
-        update.setValidationStatus(validationStatus);
-        update.setValidatedAt(LocalDateTime.now());
-
-        if (validatorName != null && !validatorName.isBlank()) {
-            Pilot pilot = update.getPilot();
-            pilot.setValidatorName(validatorName);
-            pilot.setValidationStatus(validationStatus);
-            pilotRepository.save(pilot);
-        }
-
-        return pilotUpdateRepository.save(update);
-    }
-
     public List<Pilot> getPilotsByDepartment(Long userId) {
         DepartmentProfile department = departmentProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Department profile not found"));

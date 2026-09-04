@@ -48,22 +48,6 @@ public class Pilot {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    // Extended Contract, Validation, and KPI fields
-    @Column(name = "dept_signed")
-    private Boolean deptSigned;
-    @Column(name = "startup_signed")
-    private Boolean startupSigned;
-    @Column(name = "signed_at")
-    private LocalDateTime signedAt;
-    @Column(name = "contract_terms_json", columnDefinition = "TEXT")
-    private String contractTermsJson;
-    @Column(name = "validator_name")
-    private String validatorName;
-    @Column(name = "validation_status")
-    private String validationStatus; // PENDING, UNDER_REVIEW, VALIDATED, REJECTED
-    @Column(name = "kpi_current_values_json", columnDefinition = "TEXT")
-    private String kpiCurrentValuesJson;
-
     public Pilot() {}
 
     public Pilot(Problem problem, StartupProfile startup, DepartmentProfile department, String scope,
@@ -119,21 +103,6 @@ public class Pilot {
     public void setReleasedAmount(Double releasedAmount) { this.releasedAmount = releasedAmount; }
     public Double getEscrowBalance() { return escrowBalance; }
     public void setEscrowBalance(Double escrowBalance) { this.escrowBalance = escrowBalance; }
-
-    public Boolean getDeptSigned() { return deptSigned; }
-    public void setDeptSigned(Boolean deptSigned) { this.deptSigned = deptSigned; }
-    public Boolean getStartupSigned() { return startupSigned; }
-    public void setStartupSigned(Boolean startupSigned) { this.startupSigned = startupSigned; }
-    public LocalDateTime getSignedAt() { return signedAt; }
-    public void setSignedAt(LocalDateTime signedAt) { this.signedAt = signedAt; }
-    public String getContractTermsJson() { return contractTermsJson; }
-    public void setContractTermsJson(String contractTermsJson) { this.contractTermsJson = contractTermsJson; }
-    public String getValidatorName() { return validatorName; }
-    public void setValidatorName(String validatorName) { this.validatorName = validatorName; }
-    public String getValidationStatus() { return validationStatus; }
-    public void setValidationStatus(String validationStatus) { this.validationStatus = validationStatus; }
-    public String getKpiCurrentValuesJson() { return kpiCurrentValuesJson; }
-    public void setKpiCurrentValuesJson(String kpiCurrentValuesJson) { this.kpiCurrentValuesJson = kpiCurrentValuesJson; }
 
     // Builder
     public static Builder builder() { return new Builder(); }

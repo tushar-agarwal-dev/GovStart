@@ -53,27 +53,8 @@ public class ProblemController {
                 .timelineDays(request.getTimelineDays())
                 .build();
 
-        problem.setCategory(request.getCategory());
-        problem.setLocation(request.getLocation());
-        problem.setContactPerson(request.getContactPerson());
-        problem.setCurrentProblem(request.getCurrentProblem());
-        problem.setExistingProcess(request.getExistingProcess());
-        problem.setTargetBeneficiaries(request.getTargetBeneficiaries());
-        problem.setDesiredOutcome(request.getDesiredOutcome());
-        problem.setBaselinePerformance(request.getBaselinePerformance());
-        problem.setTargetPerformance(request.getTargetPerformance());
-        problem.setExpectedImpact(request.getExpectedImpact());
-        problem.setGeographicScope(request.getGeographicScope());
-        problem.setDpiitRequired(request.getDpiitRequired());
-        problem.setTechRequirements(request.getTechRequirements());
-        problem.setMinCriteria(request.getMinCriteria());
-        problem.setEvaluationWeightsJson(request.getEvaluationWeightsJson());
-        problem.setKpisJson(request.getKpisJson());
-        problem.setMilestonesJson(request.getMilestonesJson());
-        problem.setEligibilityRequirements(request.getEligibilityRequirements());
-
         problem = problemRepository.save(problem);
-        auditLogService.logAction(user.getEmail(), "CHALLENGE_PUBLISHED", "Published outcome-based challenge: " + problem.getTitle() + " (ID: " + problem.getId() + ")");
+        auditLogService.logAction(user.getEmail(), "POSTED_CHALLENGE", "Posted outcome challenge: " + problem.getTitle() + " (ID: " + problem.getId() + ")");
         return ResponseEntity.ok(convertToResponse(problem));
     }
 
@@ -110,7 +91,7 @@ public class ProblemController {
     }
 
     private ProblemResponse convertToResponse(Problem problem) {
-        ProblemResponse response = ProblemResponse.builder()
+        return ProblemResponse.builder()
                 .id(problem.getId())
                 .departmentId(problem.getDepartment().getId())
                 .departmentName(problem.getDepartment().getDeptName())
@@ -123,26 +104,5 @@ public class ProblemController {
                 .status(problem.getStatus())
                 .createdAt(problem.getCreatedAt())
                 .build();
-
-        response.setCategory(problem.getCategory());
-        response.setLocation(problem.getLocation());
-        response.setContactPerson(problem.getContactPerson());
-        response.setCurrentProblem(problem.getCurrentProblem());
-        response.setExistingProcess(problem.getExistingProcess());
-        response.setTargetBeneficiaries(problem.getTargetBeneficiaries());
-        response.setDesiredOutcome(problem.getDesiredOutcome());
-        response.setBaselinePerformance(problem.getBaselinePerformance());
-        response.setTargetPerformance(problem.getTargetPerformance());
-        response.setExpectedImpact(problem.getExpectedImpact());
-        response.setGeographicScope(problem.getGeographicScope());
-        response.setDpiitRequired(problem.getDpiitRequired());
-        response.setTechRequirements(problem.getTechRequirements());
-        response.setMinCriteria(problem.getMinCriteria());
-        response.setEvaluationWeightsJson(problem.getEvaluationWeightsJson());
-        response.setKpisJson(problem.getKpisJson());
-        response.setMilestonesJson(problem.getMilestonesJson());
-        response.setEligibilityRequirements(problem.getEligibilityRequirements());
-
-        return response;
     }
 }
