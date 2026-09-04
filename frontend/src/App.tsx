@@ -443,7 +443,8 @@ export default function App() {
   };
 
   // Base URL configuration for production backend (Render, Railway, etc.)
-  const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+  const rawApiUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+  const API_BASE_URL = (rawApiUrl.includes('your-render-backend-url') || rawApiUrl.includes('example.com')) ? '' : rawApiUrl;
 
   // Safe fetch helper with intelligent Render backend & static host fallback
   const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
