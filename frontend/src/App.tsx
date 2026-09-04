@@ -768,8 +768,8 @@ export default function App() {
   const RenderLifecycleAnchor = ({ activeStep = 1 }: { activeStep?: number }) => (
     <div className="bg-slate-900 text-white rounded-xl border border-slate-800 p-4 shadow-xs">
       <div className="flex justify-between items-center text-[10px] font-mono tracking-wider text-slate-400 mb-2 uppercase border-b border-slate-800 pb-2">
-        <span>Government Sandbox Procurement Lifecycle (Option 5 Standard)</span>
-        <span className="text-indigo-400 font-bold">State Public Exemption Pathway</span>
+        <span>Government Sandbox Procurement Lifecycle</span>
+        <span className="text-indigo-400 font-bold">SIH26136 Standard Pathway</span>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
         {[
@@ -891,12 +891,6 @@ export default function App() {
         {view === 'landing' && (
           <div className="py-4 space-y-8">
             
-            {/* Top Executive Metrics Command Bar */}
-            <RenderExecutiveCommandBar />
-
-            {/* Main Visual Anchor */}
-            <RenderLifecycleAnchor activeStep={1} />
-
             {/* Hero Section */}
             <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xs space-y-5 max-w-5xl mx-auto text-center">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 uppercase tracking-wider">
