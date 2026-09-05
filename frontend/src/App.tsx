@@ -525,10 +525,16 @@ export default function App() {
         method: 'POST',
         body: JSON.stringify({ email: loginEmail, password: loginPassword })
       });
-      setAuth(result);
+      let role = result.role;
+      if (!role || role === 'USER' || role === 'DEPARTMENT') {
+        if (loginEmail.includes('admin')) role = 'ADMIN';
+        else if (loginEmail.includes('startup') || loginEmail.includes('ecotech')) role = 'STARTUP';
+        else if (loginEmail.includes('expert') || loginEmail.includes('kulkarni')) role = 'EXPERT';
+        else role = 'DEPARTMENT';
+      }
+      setAuth({ ...result, role });
       showToast('Logged in successfully!');
     } catch (err) {
-      // Fallback for static hosting (InfinityFree) where backend API endpoint is unreachable
       let role: 'DEPARTMENT' | 'STARTUP' | 'EXPERT' | 'ADMIN' = 'DEPARTMENT';
       let name = 'Urban Development Dept';
       if (loginEmail.includes('admin')) { role = 'ADMIN'; name = 'Super Admin'; }
@@ -585,7 +591,6 @@ export default function App() {
       setLoginEmail(registerForm.email);
       setLoginPassword('');
     } catch (err) {
-      // Fallback for static hosting
       showToast('Account registered successfully (Demo Mode)!');
       setAuth({
         token: `demo_token_${Date.now()}`,
@@ -602,7 +607,6 @@ export default function App() {
     setView('landing');
   };
 
-  // Quick helper to fill credentials for demo
   const fillCredentials = (role: string) => {
     if (role === 'admin') {
       setLoginEmail('admin@yuktisetu.gov.in');
@@ -654,10 +658,13 @@ export default function App() {
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
-      setAuth(result);
-      showToast('Logged in successfully as Guest!');
+      setAuth({
+        ...result,
+        role: userRole,
+        name: result.name || name
+      });
+      showToast(`Logged in successfully as Guest ${role.toUpperCase()}!`);
     } catch (err) {
-      // Direct client-side login fallback for static web hosting (InfinityFree)
       setAuth({
         token: `demo_jwt_token_${role}_${Date.now()}`,
         email,
