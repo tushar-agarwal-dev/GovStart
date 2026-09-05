@@ -986,9 +986,7 @@ export default function App() {
     return 'DEPARTMENT';
   };
 
-  const currentRole = auth ? getNormalizedRole(auth.role) : null;
-
-  if (view === 'dashboard' && auth && (currentRole === 'DEPARTMENT' || (currentRole !== null && !['STARTUP', 'EXPERT', 'ADMIN'].includes(currentRole)))) {
+  if (view === 'dashboard' && auth) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
         {toast && (
